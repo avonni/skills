@@ -1,0 +1,40 @@
+{
+    "name": "avonni-skills",
+    "version": "1.0.0",
+    "description": "Avonni AI Agent Skills.",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/avonni/skills.git"
+    },
+    "keywords": [
+        "agent-skills",
+        "skills",
+        "avonni",
+        "ai-agents",
+        "claude-code",
+        "cursor",
+        "github-copilot"
+    ],
+    "author": "Avonni",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/avonni/skills/issues"
+    },
+    "homepage": "https://github.com/avonni/skills#readme",
+    "devDependencies": {
+        "eslint": "^10.0.0",
+        "prettier": "^2.6.0"
+    },
+    "lint-staged": {
+        "**/*.md": [
+            "prettier --write"
+        ],
+        "**/*.{js,mjs}": [
+            "eslint"
+        ]
+    }
+}
