@@ -206,20 +206,20 @@ If a property has an object as a value, it is possible to reference the value of
 
 ## Styling (`inlineStyle`)
 
--   `value.inlineStyle` is a string, not an object.
+-   If the user requests a specific style/UI for a component, you have to read `styling.md`.
+-   Save the style in `value.inlineStyle`. It is a string, not an object.
 -   CSS declarations separated by `;`
--   Allowed global style properties for all components: `margin-top/bottom/left/right`, `padding-top/bottom/left/right`
 -   Good practice: add spacing between sibling components so they are never visually flush against each other.
 
 ### Token preference (mandatory):
 
-Always prefer LWC spacing tokens over raw pixel values. Raw pixel values (e.g., `"16px"`) are only acceptable when a token does not match the required spacing.
-Use the fallback value that corresponds to the token's intended size so the style degrades gracefully if the token is unavailable.
+Always prefer LWC tokens over raw values. Raw values (e.g., `"16px"`) are only acceptable when a token does not match the required style.
+Use the fallback value that corresponds to the token's intended value so the style degrades gracefully if the token is unavailable.
 
 -   Correct: `var(--lwc-spacingMedium, 1rem)`
 -   Avoid: `16px`
 
-**Allowed tokens:**
+**Spacing tokens:**
 `--lwc-spacingNone` · `--lwc-spacingXxxSmall` · `--lwc-spacingXxSmall` · `--lwc-spacingXSmall` · `--lwc-spacingSmall` · `--lwc-spacingMedium` · `--lwc-spacingLarge` · `--lwc-spacingXLarge` · `--lwc-spacingXxLarge`
 
 ## Visibility Rules
