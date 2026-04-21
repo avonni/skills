@@ -43,20 +43,6 @@ Your goal is to create a plan describing the Dynamic Component that will be buil
 -   Do not mention aggregate queries functions directly (SUM, COUNT, etc.). Instead explain what their result will be.
 -   When multiple components are used, organize the plan using a hierarchical structure that reflects the component tree using bullet nesting.
 
-### Mandatory output rules
-
-When referring to components, use their label, not their name.
-**Examples:**
-dcLayout → Columns Container
-dcCard → Card
-dcDatatable → Data Table
-
-When referring to properties, convert their names into natural language labels.
-**Examples:**
-iconName → icon name
-hideTableHeader → hide table header
-rowNumberOffset → row number offset
-
 ### Unknown or Ambiguous request
 
 -   The plan must make decisions. If the requirements are unclear about object fields or component features, you should pick ones.

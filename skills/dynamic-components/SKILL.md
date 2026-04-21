@@ -57,6 +57,20 @@ To create your output, you MUST follow the steps below. The steps should always 
 -   Never rely on other components to assume the docs of a component.
 -   Always use the tools result directly as returned by the MCP, even if the output is large. Never use Bash commands, file reads, or any other tool to shorten, parse, or reprocess the MCP result.
 
+### Mandatory output rules
+
+When referring to components, use their label, not their name.
+**Examples:**
+dcLayout → Columns Container
+dcCard → Card
+dcDatatable → Data Table
+
+When referring to properties, convert their names into natural language labels.
+**Examples:**
+iconName → icon name
+hideTableHeader → hide table header
+rowNumberOffset → row number offset
+
 ## Unknown or Ambiguous Requests
 
 If you need more information from the user:
