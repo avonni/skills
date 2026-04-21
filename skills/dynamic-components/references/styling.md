@@ -13,8 +13,7 @@
 Styling hooks are CSS variables that you use to update specific properties in a component's styling.
 By convention, styling hooks `name` follow this format: `namespace-component-property-modifier`
 
-**Conditional styling hooks**: Some styling hooks are conditional (`"when": { condition }`). You can use them only if the component value matches the condition.
-For example, `"when": { "variant": ["bare", "destructive" ] }` means this styling hook can be used only if the component value contains `bare` or `destructive` as a `variant`.
+**Conditional styling hooks**: Some styling hooks can be used only if a condition is met (`"when": { condition }`).
 
 **Dynamic names**: Some styling hooks contain a dynamic variable that needs to be replaced by the component value.
 For example, in `--avcmpbuilder-button-{!variant}-inline-start`, `{!variant}` should be replaced by the component variant value.
