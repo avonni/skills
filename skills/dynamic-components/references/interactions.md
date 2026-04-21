@@ -26,9 +26,10 @@ An interaction property in a component's `value` is an array of interaction obje
 ]
 ```
 
+-   If the array contains multiple entries, they will be executed in order (e.g. duplicate records, and then refresh the query).
 -   `type`: Required. Must be the exact interaction name as listed in `list_interactions`. Never invent a name.
 -   All other properties from `get_interaction_docs` are placed directly at the root level of the object.
--   If the array contains multiple entries, they will be executed in order (e.g. duplicate records, and then refresh the query).
+-   Interaction properties can be of type `interactions[]`. These nested interaction properties should use the same structure.
 
 ## Interactions Linked to a Specific Element (`targetName`)
 
@@ -51,6 +52,10 @@ If multiple entries with the same `targetName` value coexist in the same array, 
 ## Conditional Interaction Properties
 
 Some interaction properties are conditional (`"when": { condition }`). You can only use them if the interaction value matches the condition. This works the same way as conditional component properties.
+
+## Reference to Objects and Fields
+
+If an interaction value references an object or a field API name, you have to read `get-object-documentation.md`.
 
 ## Validation Requirements (Mandatory)
 
