@@ -10,8 +10,16 @@ Before writing any interaction JSON:
 2. For each interaction you plan to use, call `get_interaction_docs` once with the interaction name.
     - Never batch multiple interactions into one call.
     - Never assume the properties of an interaction — always retrieve its docs.
+    - Cache the result and use it directly. Do not call `get_interaction_docs` for the same interaction twice.
 3. Identify the properties that match the required behavior.
 4. Write the interaction JSON using the format below.
+
+## Error Handling
+
+If `list_interactions` or `get_interaction_docs` fails:
+
+-   Retry once.
+-   If it still fails, inform the user and ask whether to continue without that interaction.
 
 ## JSON Format
 
@@ -29,7 +37,6 @@ An interaction property in a component's `value` is an array of interaction obje
 -   If the array contains multiple entries, they will be executed in order (e.g. duplicate records, and then refresh the query).
 -   `type`: Required. Must be the exact interaction name as listed in `list_interactions`. Never invent a name.
 -   All other properties from `get_interaction_docs` are placed directly at the root level of the object.
--   Interaction properties can be of type `interactions[]`. These nested interaction properties should use the same structure.
 
 ## Interactions Linked to a Specific Element (`targetName`)
 
@@ -56,6 +63,34 @@ Some interaction properties are conditional (`"when": { condition }`). You can o
 ## Reference to Objects and Fields
 
 If an interaction value references an object or a field API name, you have to read `get-object-documentation.md`.
+
+## Nested Interactions
+
+Interaction properties can be of type `interactions[]`. These nested interaction properties should use the same structure. For example:
+
+```json
+"evtHeaderActionClick": [
+    {
+        "type": "OpenConfirm",
+        "confirmLabel": "Delete the Selected Records",
+        "confirmMessage": "This action is irreversible.",
+        "confirmTheme": "warning",
+        "confirmNextInteractions": [
+            {
+                "type": "DeleteSelectedRecordsConfirmation",
+                "deleteSelectedRecordsSuccessNextInteractions": [
+                    {
+                        "type": "ShowToastEvent",
+                        "showToastEventTitle": "Records Deleted",
+                        "showToastEventMessage": "The records have been successfully deleted."
+                    }
+                ]
+            }
+        ]
+
+    }
+]
+```
 
 ## Validation Requirements (Mandatory)
 
