@@ -7,10 +7,11 @@ Interactions define what happens in response to a user event on a component — 
 Before writing any interaction JSON:
 
 1. Call `list_interactions` to get the list of available interactions.
+    - If you already called this tool, use the cached result. Do not call `list_interactions` twice.
 2. For each interaction you plan to use, call `get_interaction_docs` once with the interaction name.
     - Never batch multiple interactions into one call.
     - Never assume the properties of an interaction — always retrieve its docs.
-    - Cache the result and use it directly. Do not call `get_interaction_docs` for the same interaction twice.
+    - If you already called this tool, use the cached result. Do not call `get_interaction_docs` for the same interaction twice.
 3. Identify the properties that match the required behavior.
 4. Write the interaction JSON using the format below.
 

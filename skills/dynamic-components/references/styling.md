@@ -5,7 +5,8 @@
 1. Call `get_component_styles` once per component that needs styling:
     - Pass the component name as a single `name` string input.
     - Never batch multiple components into one call.
-    - Cache the result and use it directly. Do not call `get_component_styles` for the same component twice.
+    - If the result was already cached, use it instead of calling the tool again.
+    - Do not call `get_component_styles` for the same component twice.
 2. Identify the styling hooks or CSS properties that fit the user request.
 3. Create the inline CSS string and save it in `value.inlineStyle`. It is a string, not an object:
 
