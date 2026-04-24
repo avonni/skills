@@ -5,19 +5,33 @@
 1. Call `get_component_styles` once per component that needs styling:
     - Pass the component name as a single `name` string input.
     - Never batch multiple components into one call.
+    - If the result was already cached, use it instead of calling the tool again.
+    - Do not call `get_component_styles` for the same component twice.
 2. Identify the styling hooks or CSS properties that fit the user request.
-3. Create the inline CSS string.
+3. Create the inline CSS string and save it in `value.inlineStyle`. It is a string, not an object:
+
+```json
+"value": {
+    "inlineStyle": "--avcmpbuilder-button-primary-background: #0070d2; --avcmpbuilder-button-primary-color: white;"
+}
+```
+
+## Error Handling
+
+If `get_component_styles` fails:
+
+-   Retry once.
+-   If it still fails, inform the user and ask whether to continue without component styling.
 
 ## Format of styling hook names
 
 Styling hooks are CSS variables that you use to update specific properties in a component's styling.
 By convention, styling hooks `name` follow this format: `namespace-component-property-modifier`
 
-**Conditional styling hooks**: Some styling hooks are conditional (`"when": { condition }`). You can use them only if the component value matches the condition.
-For example, `"when": { "variant": ["bare", "destructive" ] }` means this styling hook can be used only if the component value contains `bare` or `destructive` as a `variant`.
+**Conditional styling hooks**: Some styling hooks can be used only if a condition is met (`"when": { condition }`).
 
 **Dynamic names**: Some styling hooks contain a dynamic variable that needs to be replaced by the component value.
-For example, in `--avcmpbuilder-button-{!variant}-inline-start`, `{!variant}` should be replaced by the component variant value.
+For example, `--avcmpbuilder-button-{!variant}-inline-start` where the component `variant` is `"primary"` becomes `--avcmpbuilder-button-primary-inline-start`.
 
 ## Validation Requirements (Mandatory)
 

@@ -96,6 +96,14 @@ For any property of type `icon`:
 -   Use only valid Salesforce Lightning Design System icons, in the format `category:icon-name` (for example `standard:account`).
 -   Never invent icons.
 
+#### Conditional properties
+
+Some properties can be used only if a condition is met (`"when": { condition }`). You can use them only if the component value matches the condition.
+For example:
+
+-   `"when": { "variant": ["bare", "destructive" ] }` means this property can be used only if the component value contains `bare` or `destructive` as a `variant`.
+-   `"when": { "variant": true }` means this property can be used if any variant value is set.
+
 ## Slots
 
 Include `"slots"` only if the component definition declares at least one slot. If the component has no slots, omit `slots` entirely — never output `"slots": []`.
@@ -221,6 +229,10 @@ Use the fallback value that corresponds to the token's intended value so the sty
 
 **Spacing tokens:**
 `--lwc-spacingNone` · `--lwc-spacingXxxSmall` · `--lwc-spacingXxSmall` · `--lwc-spacingXSmall` · `--lwc-spacingSmall` · `--lwc-spacingMedium` · `--lwc-spacingLarge` · `--lwc-spacingXLarge` · `--lwc-spacingXxLarge`
+
+## Interactions
+
+If you need to use a property of type `interaction[]`, you have to read `interactions.md`.
 
 ## Visibility Rules
 
