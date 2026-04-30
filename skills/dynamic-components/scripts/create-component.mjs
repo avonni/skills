@@ -1,27 +1,19 @@
 #!/usr/bin/env node
 /**
  * Reads Avonni Dynamic Component build JSON and writes
- * avxp__AvonniDynamicComponent.<apiName>_N.md-meta.xml for deployment.
- * N is the smallest positive integer such that no file with that name exists
- * anywhere under ./force-app (resolved from --out-dir or cwd).
+ * avxp__AvonniDynamicComponent.<apiName>_<version>.md-meta.xml for deployment.
  *
  * Usage:
- *   node create-component.mjs <path-to.json> [--out-dir <directory>] [--user "<full name>"]
+ *   node create-component.mjs <path-to.json> [--out-dir <directory>] [--user "<full name>"] [--version <number>]
  *
  * If --user is set, CreatedByName__c and LastModifiedByName__c are written with that value.
- *
+ * If --version is omitted, defaults to 1.
  * If --out-dir is omitted, writes under ./force-app/main/default/customMetadata
  * relative to the current working directory (run from repo root or pass --out-dir).
  */
 
-import {
-    existsSync,
-    mkdirSync,
-    readFileSync,
-    readdirSync,
-    writeFileSync
-} from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 const CUSTOM_METADATA_NS = 'http://soap.sforce.com/2006/04/metadata';
 const XSI_NS = 'http://www.w3.org/2001/XMLSchema-instance';
@@ -140,9 +132,10 @@ function valuesBlockDoubleField(fieldName, doubleText) {
 /**
  * @param {unknown} data
  * @param {string | undefined} userFullName trimmed display name for CreatedByName__c / LastModifiedByName__c
+ * @param {number} versionNumber
  * @returns {string}
  */
-function buildCustomMetadataXml(data, userFullName) {
+function buildCustomMetadataXml(data, userFullName, versionNumber) {
     const apiName = data.apiName;
     if (!isValidApiName(apiName)) {
         throw new Error(
@@ -222,7 +215,7 @@ function buildCustomMetadataXml(data, userFullName) {
             'Value__c',
             escapeXmlString(JSON.stringify(value))
         ),
-        valuesBlockDoubleField('VersionNumber__c', '1.0'),
+        valuesBlockDoubleField('VersionNumber__c', String(versionNumber)),
         '</CustomMetadata>',
         ''
     );
@@ -230,73 +223,6 @@ function buildCustomMetadataXml(data, userFullName) {
     return parts.join('\n');
 }
 
-/**
- * Walks up from outDir to find a directory that contains a `force-app` folder.
- * Falls back to process.cwd() if none is found.
- * @param {string} outDir
- * @returns {string}
- */
-function findRepoRootFromOutDir(outDir) {
-    let dir = resolve(outDir);
-    for (;;) {
-        if (existsSync(join(dir, 'force-app'))) {
-            return dir;
-        }
-        const parent = dirname(dir);
-        if (parent === dir) {
-            return process.cwd();
-        }
-        dir = parent;
-    }
-}
-
-/**
- * Recursively collects numeric suffixes N for existing
- * AvonniDynamicComponent.<apiName>_N.md-meta.xml files under dir.
- * @param {string} dir
- * @param {string} apiName
- * @param {Set<number>} takenSuffixes
- */
-function collectMetadataSuffixesForApiName(dir, apiName, takenSuffixes) {
-    if (!existsSync(dir)) {
-        return;
-    }
-    const prefix = `${addNamespace('AvonniDynamicComponent')}.${apiName}_`;
-    const suffix = '.md-meta.xml';
-    const entries = readdirSync(dir, { withFileTypes: true });
-    for (const ent of entries) {
-        const p = join(dir, ent.name);
-        if (ent.isDirectory()) {
-            collectMetadataSuffixesForApiName(p, apiName, takenSuffixes);
-        } else if (ent.name.startsWith(prefix) && ent.name.endsWith(suffix)) {
-            const numStr = ent.name.slice(prefix.length, -suffix.length);
-            if (/^\d+$/.test(numStr)) {
-                takenSuffixes.add(parseInt(numStr, 10));
-            }
-        }
-    }
-}
-
-/**
- * Smallest positive integer N such that <namespace>__AvonniDynamicComponent.<apiName>_N.md-meta.xml
- * does not exist under <repoRoot>/force-app.
- * @param {string} repoRoot
- * @param {string} apiName
- * @returns {number}
- */
-function nextAvailableMetadataSuffix(repoRoot, apiName) {
-    const taken = new Set();
-    collectMetadataSuffixesForApiName(
-        join(repoRoot, 'force-app'),
-        apiName,
-        taken
-    );
-    let n = 1;
-    while (taken.has(n)) {
-        n += 1;
-    }
-    return n;
-}
 
 function parseArgs(argv) {
     /** @type {string | undefined} */
@@ -305,6 +231,8 @@ function parseArgs(argv) {
     let outDir;
     /** @type {string | undefined} */
     let userFullName;
+    /** @type {number} */
+    let versionNumber = 1;
 
     for (let i = 0; i < argv.length; i += 1) {
         const a = argv[i];
@@ -326,6 +254,17 @@ function parseArgs(argv) {
             }
             userFullName = trimmed;
             i += 1;
+        } else if (a === '--version') {
+            const next = argv[i + 1];
+            if (!next || next.startsWith('-')) {
+                throw new Error('--version requires a positive number');
+            }
+            const parsed = parseFloat(next);
+            if (isNaN(parsed) || parsed <= 0) {
+                throw new Error('--version requires a positive number');
+            }
+            versionNumber = parsed;
+            i += 1;
         } else if (!a.startsWith('-')) {
             if (jsonPath) {
                 throw new Error(`Unexpected argument: ${a}`);
@@ -338,7 +277,7 @@ function parseArgs(argv) {
 
     if (!jsonPath) {
         throw new Error(
-            'Usage: node create-component.mjs <path-to.json> [--out-dir <directory>] [--user "<full name>"]'
+            'Usage: node create-component.mjs <path-to.json> [--out-dir <directory>] [--user "<full name>"] [--version <number>]'
         );
     }
 
@@ -353,12 +292,15 @@ function parseArgs(argv) {
     return {
         jsonPath: resolve(jsonPath),
         outDir: resolve(outDir ?? defaultOut),
-        userFullName
+        userFullName,
+        versionNumber
     };
 }
 
 function main() {
-    const { jsonPath, outDir, userFullName } = parseArgs(process.argv.slice(2));
+    const { jsonPath, outDir, userFullName, versionNumber } = parseArgs(
+        process.argv.slice(2)
+    );
 
     const raw = readFileSync(jsonPath, 'utf8');
     let data;
@@ -376,13 +318,9 @@ function main() {
         throw new Error('JSON root must be an object');
     }
 
-    const xml = buildCustomMetadataXml(data, userFullName);
+    const xml = buildCustomMetadataXml(data, userFullName, versionNumber);
     const apiName = data.apiName;
-    const repoRoot = findRepoRootFromOutDir(outDir);
-    const suffix = nextAvailableMetadataSuffix(repoRoot, apiName);
-    const fileName = `${addNamespace(
-        'AvonniDynamicComponent'
-    )}.${apiName}_${suffix}.md-meta.xml`;
+    const fileName = `${addNamespace('AvonniDynamicComponent')}.${apiName}_${versionNumber}.md-meta.xml`;
     const outPath = join(outDir, fileName);
 
     mkdirSync(outDir, { recursive: true });
