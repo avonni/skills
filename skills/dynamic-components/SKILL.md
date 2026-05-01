@@ -1,21 +1,32 @@
 ---
 name: avonni-dynamic-components
-description: Create Avonni Dynamic Components.
+description: Create or update Avonni Dynamic Components.
 ---
 
 # avonni-dynamic-components
 
 ## Usage
 
-This skill describes how to use the Avonni Dynamic Component MCP to create components. You should use it for any user request that aims to create an Avonni Dynamic Component.
+This skill describes how to use the Avonni Dynamic Components MCP to create or update components. You should use it for any user request that aims to create or update an Avonni Dynamic Component.
 
 ## Execution Workflow
 
 To create your output, you MUST follow the steps below. The steps should always be executed in order, you cannot skip a step. If you go back to a previous step, all subsequent steps have to be executed again in order.
 
+### Step 0 — Detect Intent
+
+Determine whether the user wants to **create** a new component or **update** an existing one from a metadata file. If the request is ambiguous, ask the user to clarify before proceeding.
+
+-   If **creating**: follow the **Create Path** below.
+-   If **updating**: follow the **Update Path** below.
+
+---
+
+### Create Path
+
 1. Read `references/plan-component.md`. Then make a component building plan strictly following the instructions in that file.
 2. Ask the user to validate your plan.
-    - If the plan is accepted as is, continue to the step 3.
+    - If the plan is accepted as is, continue to step 3.
     - If the user asks for changes, go back to step 1.
 3. Read `references/build-component.md`. Then generate the planned components JSON strictly following the instructions in that file.
     - Write the JSON output to a temporary `component.json` file.
@@ -25,6 +36,25 @@ To create your output, you MUST follow the steps below. The steps should always 
     - Tell them that the component file has been created and where.
     - Tell them that the component was not deployed.
     - Summarize the component features.
+
+---
+
+### Update Path
+
+1. Read `references/read-component-metadata.md` and follow its instructions to parse the existing metadata file and present the current component to the user.
+2. Ask the user to describe the changes they want to make.
+3. Read `references/plan-component.md`. Then make an updated component building plan strictly following the instructions in that file, incorporating the requested changes.
+4. Ask the user to validate your updated plan.
+    - If the plan is accepted as is, continue to step 5.
+    - If the user asks for changes, go back to step 3.
+5. Read `references/build-component.md`. Then generate the updated components JSON strictly following the instructions in that file.
+    - Overwrite the existing `component.json` file created in step 1 with the new JSON output.
+6. Read `references/create-component-metadata.md` and follow its instructions to save the updated component version.
+7. Delete the temporary `component.json` file.
+8. Summarize the task result to the user:
+    - Tell them what file has been created or updated, and where.
+    - Tell them that the component was not deployed.
+    - Summarize what changed compared to the previous version.
 
 ## Authority
 
