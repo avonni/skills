@@ -2,11 +2,7 @@
 
 Your goal is to save a Dynamic Component as a metadata file. Depending on the user's choice, this either creates a new version or updates the current one in place.
 
-## Step 1 — Get the Current User Full Name
-
-Read `references/get-current-user.md` and follow its instructions.
-
-## Step 2 — Query Existing Versions
+## Step 1 — Query Existing Versions
 
 Run the following Salesforce query, replacing `<apiName>` with the component's `apiName`:
 
@@ -22,36 +18,39 @@ From the results:
 ### Error handling
 
 -   If the query fails, retry once.
--   If it still fails, inform the user and ask whether to continue. If continuing, use version `1` and skip Step 4.
--   If no records are returned, use version `1` and skip Step 4.
+-   If it still fails, inform the user and ask whether to continue. If continuing, use version `1` and skip Step 3.
+-   If no records are returned, use version `1` and skip Step 3.
 
-## Step 3 — Choose Versioning Strategy
+## Step 2 — Choose Versioning Strategy
 
-If Step 2 returned existing records, stop and present the following options to the user. Use this exact format so they can reply with just a number:
+If Step 1 returned existing records, stop and present the following options to the user. Use this exact format so they can reply with just a number:
 
 > How do you want to save this component?
 > 1. Create a new version (version `<nextVersion>`) — default
 > 2. Update the current version (version `<currentVersion>`) directly
 
--   If the user replies `1`, does not answer, or their answer is ambiguous: use `<nextVersion>` in Step 4, and run Step 5.
--   If the user replies `2`, or their answer clearly expresses intent to overwrite/update the current version: use `<currentVersion>` in Step 4, and skip Step 5.
+-   If the user replies `1`, does not answer, or their answer is ambiguous: use `<nextVersion>` in Step 3, and run Step 4.
+-   If the user replies `2`, or their answer clearly expresses intent to overwrite/update the current version: use `<currentVersion>` in Step 3, and skip Step 4.
 
-If Step 2 returned no records (first-time save), use version `1` and skip Step 5 — do not ask the user.
+If Step 1 returned no records (first-time save), use version `1` and skip Step 4 — do not ask the user.
 
-## Step 4 — Save the Version File
+## Step 3 — Save the Version File
 
-Run the script with the `--version` flag:
+Pipe the component JSON (generated in the previous skill step) directly into the script via stdin using a heredoc. Do not write the JSON to a file first.
 
 ```bash
-node <skill_base_directory>/scripts/create-component.mjs <path to component.json> --version <version> --user "<full user name>"
+node <skill_base_directory>/scripts/create-component.mjs - --version <version> <<'EOF'
+<component JSON here>
+EOF
 ```
 
--   Replace `<version>` with the version number determined in Step 3.
--   If you failed to get the current user name, omit the `--user` parameter.
+-   The `-` positional argument tells the script to read JSON from stdin.
+-   Use `<<'EOF'` (quoted) so the shell does not interpolate `$` or backticks inside the JSON.
+-   Replace `<version>` with the version number determined in Step 2.
 
-## Step 5 — Remove "last modified" Flag From the Previous Version
+## Step 4 — Remove "last modified" Flag From the Previous Version
 
-If you saved a `DeveloperName` in Step 2, run:
+If you saved a `DeveloperName` in Step 1, run:
 
 ```bash
 node <skill_base_directory>/scripts/remove-last-modified-flag.mjs <DeveloperName>

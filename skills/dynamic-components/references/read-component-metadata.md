@@ -5,13 +5,13 @@ Your goal is to read an existing Dynamic Component metadata file and present its
 ## Execution Workflow
 
 1. Ask the user for the path to the existing `.md-meta.xml` file they want to update.
-2. Run the script to extract the component JSON:
+2. Run the script to extract the component JSON to stdout:
 
 ```bash
-node <skill_base_directory>/scripts/read-component.mjs <path-to.md-meta.xml> --out component.json
+node <skill_base_directory>/scripts/read-component.mjs <path-to.md-meta.xml>
 ```
 
-3. Read the generated `component.json` file.
+3. Use the JSON printed on stdout directly — do not write it to disk.
 4. Present the current component structure to the user as a natural-language plan.
 
 ## Present the Current Component Plan

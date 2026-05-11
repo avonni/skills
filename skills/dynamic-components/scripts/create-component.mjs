@@ -4,12 +4,15 @@
  * avxp__AvonniDynamicComponent.<apiName>_<version>.md-meta.xml for deployment.
  *
  * Usage:
- *   node create-component.mjs <path-to.json> [--out-dir <directory>] [--user "<full name>"] [--version <number>]
+ *   node create-component.mjs <path-to.json | -> [--out-dir <directory>] [--version <number>]
  *
- * If --user is set, CreatedByName__c and LastModifiedByName__c are written with that value.
+ * Pass `-` (or omit the path) to read JSON from stdin.
  * If --version is omitted, defaults to 1.
  * If --out-dir is omitted, writes under ./force-app/main/default/customMetadata
  * relative to the current working directory (run from repo root or pass --out-dir).
+ *
+ * Author attribution relies on Salesforce's auto-populated CreatedById /
+ * LastModifiedById at deploy time — no custom name fields are written.
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -131,11 +134,10 @@ function valuesBlockDoubleField(fieldName, doubleText) {
 
 /**
  * @param {unknown} data
- * @param {string | undefined} userFullName trimmed display name for CreatedByName__c / LastModifiedByName__c
  * @param {number} versionNumber
  * @returns {string}
  */
-function buildCustomMetadataXml(data, userFullName, versionNumber) {
+function buildCustomMetadataXml(data, versionNumber) {
     const apiName = data.apiName;
     if (!isValidApiName(apiName)) {
         throw new Error(
@@ -153,26 +155,14 @@ function buildCustomMetadataXml(data, userFullName, versionNumber) {
 
     const label = labelFromApiName(apiName);
     const createdAt = formatCreatedDateTimeUtc();
-    const hasUserFullName =
-        typeof userFullName === 'string' && userFullName.length > 0;
 
     const parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         `<CustomMetadata xmlns="${CUSTOM_METADATA_NS}" xmlns:xsi="${XSI_NS}" xmlns:xsd="${XSD_NS}">`,
         `    <label>${escapeXmlString(label)}</label>`,
-        '    <protected>false</protected>'
+        '    <protected>false</protected>',
+        valuesBlockDateTimeField('CreatedDateTime__c', createdAt)
     ];
-
-    if (hasUserFullName) {
-        parts.push(
-            valuesBlockStringField(
-                'CreatedByName__c',
-                escapeXmlString(userFullName)
-            )
-        );
-    }
-
-    parts.push(valuesBlockDateTimeField('CreatedDateTime__c', createdAt));
 
     if (hasDescription) {
         parts.push(
@@ -188,18 +178,9 @@ function buildCustomMetadataXml(data, userFullName, versionNumber) {
             'DynamicComponentName__c',
             escapeXmlString(apiName)
         ),
-        valuesBlockBooleanField('IsLastModified__c', true)
+        valuesBlockBooleanField('IsLastModified__c', true),
+        valuesBlockDateTimeField('LastModifiedDateTime__c', createdAt)
     );
-
-    if (hasUserFullName) {
-        parts.push(
-            valuesBlockStringField(
-                'LastModifiedByName__c',
-                escapeXmlString(userFullName)
-            )
-        );
-    }
-    parts.push(valuesBlockDateTimeField('LastModifiedDateTime__c', createdAt));
 
     parts.push(
         valuesBlockStringField(
@@ -229,8 +210,6 @@ function parseArgs(argv) {
     let jsonPath;
     /** @type {string | undefined} */
     let outDir;
-    /** @type {string | undefined} */
-    let userFullName;
     /** @type {number} */
     let versionNumber = 1;
 
@@ -243,17 +222,6 @@ function parseArgs(argv) {
             }
             outDir = next;
             i += 1;
-        } else if (a === '--user') {
-            const next = argv[i + 1];
-            if (!next || next.startsWith('-')) {
-                throw new Error('--user requires a non-empty full name');
-            }
-            const trimmed = next.trim();
-            if (!trimmed) {
-                throw new Error('--user requires a non-empty full name');
-            }
-            userFullName = trimmed;
-            i += 1;
         } else if (a === '--version') {
             const next = argv[i + 1];
             if (!next || next.startsWith('-')) {
@@ -265,7 +233,7 @@ function parseArgs(argv) {
             }
             versionNumber = parsed;
             i += 1;
-        } else if (!a.startsWith('-')) {
+        } else if (a === '-' || !a.startsWith('-')) {
             if (jsonPath) {
                 throw new Error(`Unexpected argument: ${a}`);
             }
@@ -273,12 +241,6 @@ function parseArgs(argv) {
         } else {
             throw new Error(`Unknown option: ${a}`);
         }
-    }
-
-    if (!jsonPath) {
-        throw new Error(
-            'Usage: node create-component.mjs <path-to.json> [--out-dir <directory>] [--user "<full name>"] [--version <number>]'
-        );
     }
 
     const defaultOut = join(
@@ -289,26 +251,28 @@ function parseArgs(argv) {
         'customMetadata'
     );
 
+    const useStdin = !jsonPath || jsonPath === '-';
+
     return {
-        jsonPath: resolve(jsonPath),
+        jsonPath: useStdin ? null : resolve(jsonPath),
         outDir: resolve(outDir ?? defaultOut),
-        userFullName,
         versionNumber
     };
 }
 
 function main() {
-    const { jsonPath, outDir, userFullName, versionNumber } = parseArgs(
+    const { jsonPath, outDir, versionNumber } = parseArgs(
         process.argv.slice(2)
     );
 
-    const raw = readFileSync(jsonPath, 'utf8');
+    const source = jsonPath ?? 'stdin';
+    const raw = readFileSync(jsonPath ?? 0, 'utf8');
     let data;
     try {
         data = JSON.parse(raw);
     } catch (e) {
         throw new Error(
-            `Invalid JSON in ${jsonPath}: ${
+            `Invalid JSON in ${source}: ${
                 e instanceof Error ? e.message : String(e)
             }`
         );
@@ -318,7 +282,7 @@ function main() {
         throw new Error('JSON root must be an object');
     }
 
-    const xml = buildCustomMetadataXml(data, userFullName, versionNumber);
+    const xml = buildCustomMetadataXml(data, versionNumber);
     const apiName = data.apiName;
     const fileName = `${addNamespace('AvonniDynamicComponent')}.${apiName}_${versionNumber}.md-meta.xml`;
     const outPath = join(outDir, fileName);
