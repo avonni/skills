@@ -4,9 +4,9 @@ Your goal is to create a plan describing the Dynamic Component that will be buil
 
 ## Execution Workflow
 
-1. Call `list_components` using the MCP.
+1. Call `list_components` with `package: "dynamic"` using the MCP.
 2. Determine what components fit the user request.
-3. Call `get_component_docs` once per selected component.
+3. Call `get_component_docs` with `package: "dynamic"` once per selected component.
     - Pass the component name as a single `name` string input.
     - Never batch multiple components into one call.
     - Process each response directly — no shell commands are needed to parse the result.
@@ -37,7 +37,7 @@ Your goal is to create a plan describing the Dynamic Component that will be buil
 ## 3. Identify existing styles
 
 -   If the user needs to style the components, you have to check the available styles.
--   Call `get_component_styles` once per component that needs styling:
+-   Call `get_component_styles` with `package: "dynamic"` once per component that needs styling:
     -   Pass the component name as a single `name` string input.
     -   Never batch multiple components into one call.
 

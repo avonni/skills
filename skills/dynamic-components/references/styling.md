@@ -2,7 +2,7 @@
 
 ## Execution Workflow
 
-1. Call `get_component_styles` once per component that needs styling:
+1. Call `get_component_styles` with `package: "dynamic"` once per component that needs styling:
     - Pass the component name as a single `name` string input.
     - Never batch multiple components into one call.
     - If the result was already cached, use it instead of calling the tool again.

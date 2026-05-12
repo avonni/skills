@@ -26,7 +26,7 @@ Once installed, describe the Avonni component you want to build. The AI will use
 
 ## Requirements
 
--   The Avonni MCP servers configured in your AI assistant's settings.
+-   The Avonni MCP server configured in your AI assistant's settings.
 -   Any AI agent that is able to execute scripts and generate files (e.g. Claude Code, Cursor, GitHub Copilot, etc.).
 -   [NodeJS](https://nodejs.org/en/download) installed.
 -   The [Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm) installed.
