@@ -51,6 +51,11 @@ Reuse existing component instances when possible.
 -   Only use object keys defined in the resolved type schema.
 -   For any non-primitive attribute, you must retrieve its type definition before use.
 
+### Complex Types
+
+-   When a component references a complex type (a non-primitive type, e.g. `DdListMapping` or `DdListAvatar`), you must call `get_type` with that exact type name before writing any code that uses it.
+-   When multiple nested types are present, recursively call `get_type` for each nested type referenced, until all types used in code are resolved.
+
 ## Event Rules
 
 -   Only use events listed in the component's MCP docs.
