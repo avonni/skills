@@ -29,10 +29,9 @@ Determine whether the user wants to **create** a new component or **update** an 
     - If the plan is accepted as is, continue to step 3.
     - If the user asks for changes, go back to step 1.
 3. Read `references/build-component.md`. Then generate the planned components JSON strictly following the instructions in that file.
-    - Write the JSON output to a temporary `component.json` file.
+    - Keep the JSON in memory — do not write it to disk. It is piped to the save script in the next step.
 4. Read `references/create-component-metadata.md` and follow its instructions to create a custom metadata record file.
-5. Delete the temporary `component.json` file.
-6. Summarize the task result to the user:
+5. Summarize the task result to the user:
     - Tell them that the component file has been created and where.
     - Tell them that the component was not deployed.
     - Summarize the component features.
@@ -48,10 +47,9 @@ Determine whether the user wants to **create** a new component or **update** an 
     - If the plan is accepted as is, continue to step 5.
     - If the user asks for changes, go back to step 3.
 5. Read `references/build-component.md`. Then generate the updated components JSON strictly following the instructions in that file.
-    - Overwrite the existing `component.json` file created in step 1 with the new JSON output.
+    - Keep the JSON in memory — do not write it to disk. It is piped to the save script in the next step.
 6. Read `references/create-component-metadata.md` and follow its instructions to save the updated component version.
-7. Delete the temporary `component.json` file.
-8. Summarize the task result to the user:
+7. Summarize the task result to the user:
     - Tell them what file has been created or updated, and where.
     - Tell them that the component was not deployed.
     - Summarize what changed compared to the previous version.
