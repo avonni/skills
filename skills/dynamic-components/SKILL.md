@@ -1,9 +1,13 @@
 ---
-name: avonni-dynamic-components
+name: dynamic-components
 description: Create or update Avonni Dynamic Components.
 ---
 
 # avonni-dynamic-components
+
+## Package
+
+This skill works exclusively with the **`dynamic` package** of the Avonni MCP. All MCP tool calls must include `package: "dynamic"` where applicable. Do not use this skill for standard Avonni LWC components (use the `avonni-components` skill instead).
 
 ## Usage
 
