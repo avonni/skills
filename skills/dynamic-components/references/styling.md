@@ -33,6 +33,16 @@ By convention, styling hooks `name` follow this format: `namespace-component-pro
 **Dynamic names**: Some styling hooks contain a dynamic variable that needs to be replaced by the component value.
 For example, `--avcmpbuilder-button-{!variant}-inline-start` where the component `variant` is `"primary"` becomes `--avcmpbuilder-button-primary-inline-start`.
 
+## Full-Height Components
+
+To make a component fill the remaining vertical space of the viewport, use this inline style — keep `{{ElementPosition.top}}` as a literal placeholder, do not replace it:
+
+```json
+"value": {
+    "inlineStyle": "height: calc(100vh - {{ElementPosition.top}} - 1rem);"
+}
+```
+
 ## Validation Requirements (Mandatory)
 
 The output is an inline style CSS string of `<property>: <value>;` pairs.
