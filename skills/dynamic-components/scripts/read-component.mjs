@@ -59,7 +59,9 @@ function parseJsonArray(raw, fieldName) {
         return parsed;
     } catch (e) {
         throw new Error(
-            `Failed to parse ${fieldName}: ${e instanceof Error ? e.message : String(e)}`
+            `Failed to parse ${fieldName}: ${
+                e instanceof Error ? e.message : String(e)
+            }`
         );
     }
 }
@@ -107,7 +109,9 @@ function main() {
     const xml = readFileSync(xmlPath, 'utf8');
     const fields = parseFieldValues(xml);
 
-    const apiName = unescapeXml(fields['avxp__DynamicComponentName__c'] ?? '').trim();
+    const apiName = unescapeXml(
+        fields['avxp__DynamicComponentName__c'] ?? ''
+    ).trim();
     if (!apiName) {
         throw new Error(
             'Could not find avxp__DynamicComponentName__c in the metadata file.'
@@ -119,8 +123,14 @@ function main() {
         : '';
 
     const value = parseJsonArray(fields['avxp__Value__c'], 'avxp__Value__c');
-    const queries = parseJsonArray(fields['avxp__Queries__c'], 'avxp__Queries__c');
-    const resources = parseJsonArray(fields['avxp__Resources__c'], 'avxp__Resources__c');
+    const queries = parseJsonArray(
+        fields['avxp__Queries__c'],
+        'avxp__Queries__c'
+    );
+    const resources = parseJsonArray(
+        fields['avxp__Resources__c'],
+        'avxp__Resources__c'
+    );
 
     const output = JSON.stringify(
         { apiName, description, value, queries, resources },
