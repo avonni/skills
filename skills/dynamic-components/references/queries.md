@@ -74,4 +74,7 @@ When using query data source in a component set inside `value`:
 -   `"itemsSObject": "{!$Query.<apiName>}"`
 -   `"itemsSObjectApiName": "<ObjectApiName>"` — must always equal the `objectApiName` of the referenced query
 -   `"nbItems": "{!$Query.<apiName>.nbItems}"`
--   `"itemsSObjectMapping": { ... }` — uses `{{Record.FieldName}}`
+-   `"itemsSObjectMapping": { ... }` — maps each component item key to its value. Each key can be set to:
+    -   A static value: `"iconName": "standard:account"`
+    -   A record field: `"label": "{{Record.Name}}"`
+    -   A mix of both: `"description": "They live in {{Record.BillingCity}}"`
