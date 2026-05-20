@@ -44,21 +44,21 @@ The object API name will be included in the plan and passed through to the build
 -   If the user needs to interact with the components, you have to check the available interactions.
 -   Call `list_interactions` to get the list of available interactions.
 
-## 3. Identify existing styles
+## Identify existing styles
 
 -   If the user needs to style the components, you have to check the available styles.
 -   Call `get_component_styles` with `package: "dynamic"` once per component that needs styling:
     -   Pass the component name as a single `name` string input.
     -   Never batch multiple components into one call.
 
-## 4. Identify what objects are used in the plan
+## Identify what objects are used in the plan
 
 -   If components display records through a query, you need to identify which object(s) they use and what their fields are.
 -   To retrieve objects and field documentation, read `get-object-documentation.md`.
 -   Your plan CANNOT include objects or fields that are not available in the objects documentation.
 -   If the components only display static data, do not retrieve the objects documentation.
 
-## 5. Create the plan
+## Create the plan
 
 -   The plan should be understandable by a non-technical user.
 -   Describe the components features in natural language. Do not list all of their properties.
