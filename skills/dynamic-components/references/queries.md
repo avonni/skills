@@ -7,7 +7,6 @@ When a component uses a query as its data source, a query definition has to be c
 ```json
 {
     "apiName": "getAccounts",
-    "id": "uuid-v4",
     "objectApiName": "Account",
     "filter": "<Filter string including references to variables>",
     "filterVariables": {
@@ -21,7 +20,7 @@ When a component uses a query as its data source, a query definition has to be c
 }
 ```
 
--   `apiName`, `id` and `objectApiName` are mandatory.
+-   `apiName` and `objectApiName` are mandatory. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
 -   `filter`, `filterVariables`, `filterVariablesTypes`, `orderBy` and `queryLimit` are optional.
 
 ## Query Filters
@@ -51,7 +50,6 @@ Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Nu
 ```json
 {
     "apiName": "get_accounts",
-    "id": "uuid-v4",
     "objectApiName": "Account",
     "filter": "Industry IN (:variable1item0, :variable1item1, :variable1item2) AND (Name LIKE :variable2 OR CreatedDate >= :variable3)",
     "filterVariables": {

@@ -9,7 +9,6 @@ Nested queries allow fetching related objects in a hierarchical structure. They 
 ```json
 {
     "apiName": "getAccountsContacts",
-    "id": "uuid-v4",
     "nestedQueries": [
         {
             "objectApiName": "Account",

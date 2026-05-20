@@ -139,12 +139,6 @@ function valuesBlockDoubleField(fieldName, doubleText) {
  */
 function buildCustomMetadataXml(data, versionNumber) {
     const apiName = data.apiName;
-    if (!isValidApiName(apiName)) {
-        throw new Error(
-            'Invalid or missing apiName: must start with a letter, use only letters, digits, and single underscores (no trailing or double underscore).'
-        );
-    }
-
     const queries = Array.isArray(data.queries) ? data.queries : [];
     const resources = Array.isArray(data.resources) ? data.resources : [];
     const value = Array.isArray(data.value) ? data.value : [];
@@ -203,7 +197,6 @@ function buildCustomMetadataXml(data, versionNumber) {
 
     return parts.join('\n');
 }
-
 
 function parseArgs(argv) {
     /** @type {string | undefined} */
@@ -284,7 +277,9 @@ function main() {
 
     const xml = buildCustomMetadataXml(data, versionNumber);
     const apiName = data.apiName;
-    const fileName = `${addNamespace('AvonniDynamicComponent')}.${apiName}_${versionNumber}.md-meta.xml`;
+    const fileName = `${addNamespace(
+        'AvonniDynamicComponent'
+    )}.${apiName}_${versionNumber}.md-meta.xml`;
     const outPath = join(outDir, fileName);
 
     mkdirSync(outDir, { recursive: true });
