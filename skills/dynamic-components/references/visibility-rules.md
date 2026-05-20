@@ -22,8 +22,10 @@
 }
 ```
 
--   `field` references must use `"{!...}"` syntax
--   Allowed logical operators: `and`, `or`
+-   `field` must be a reference to a resource (`{!myConstant}`) or a component property (`{!List1.clickedItemActionName}`).
+-   Allowed logical operators: `and`, `or`.
+-   Value type should be adapted to the field type (string, boolean, etc.).
+-   Value can be a primitive or a reference.
 
 ## Allowed operators
 
