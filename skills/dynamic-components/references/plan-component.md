@@ -11,6 +11,16 @@ Your goal is to create a plan describing the Dynamic Component that will be buil
     - Never batch multiple components into one call.
     - Process each response directly — no shell commands are needed to parse the result.
 
+## Determine target page context
+
+Before picking components, determine whether the component will be placed on a **record page** (e.g., an Account or Opportunity page):
+
+-   If the user's request clearly implies a record page (e.g., "on the Account page", "show the current record's fields"), note the object API name (e.g., `Account`, `Opportunity`).
+-   If it is unclear, ask the user before proceeding.
+-   If the component is not for a record page, no object API name is needed.
+
+The object API name will be included in the plan and passed through to the build and save steps.
+
 ## Pick components
 
 -   If the user request is unclear on what component to use, ask questions.

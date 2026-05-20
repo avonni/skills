@@ -10,6 +10,7 @@ Return exactly this JSON output:
 {
     "apiName": "Component_API_Name",
     "description": "Description of the component purpose",
+    "objectApiName": "Account",
     "value": [
         /* one or more root component wrappers */
     ],
@@ -25,6 +26,7 @@ Return exactly this JSON output:
 -   If no queries/resources/value is needed, return empty arrays: `"queries": []`, `"resources": []`, `"value": []`.
 -   `apiName` is required (max 30 characters). It serves as the title of the component. For example, "Account_Dashboard".
 -   `description` is optional (max 255 characters). It serves as the description of the component. For example, "A dashboard that displays account details".
+-   `objectApiName` is optional. Set it to the Salesforce object API name (e.g., `"Account"`) when the component is placed on a record page. Omit it otherwise.
 
 ## API Name Rules (Global)
 
@@ -239,6 +241,8 @@ Variables referenced using `{!$Component.<name>}`.
 | `ObjectApiName`   | string     | Record page only   |
 | `RecordId`        | string     | Record page only   |
 | `Record`          | collection | Record page only   |
+
+`ObjectApiName`, `RecordId`, and `Record` are only available when `objectApiName` is set (i.e., the component is placed on a record page). `Record`'s properties are the fields of the current page record. For example, `{!$Component.Record.Name}` references the `Name` field of the current record.
 
 #### GlobalConstant
 
