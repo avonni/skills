@@ -36,17 +36,20 @@ If Step 1 returned no records (first-time save), use version `1` and skip Step 4
 
 ## Step 3 — Save the Version File
 
-Pipe the component JSON (generated in the previous skill step) directly into the script via stdin using a heredoc. Do not write the JSON to a file first.
+Before saving, check whether you are on the **Update Path** (i.e., you read an existing metadata file earlier in this session). If so, the read script produced a `_passthrough` object that must be merged back into the component JSON. Add it as a top-level `"_passthrough"` key so that fields not managed by the build process (status, style classes, interactions, audit timestamps, etc.) are preserved in the output file.
+
+Pipe the component JSON directly into the script via stdin using a heredoc. Do not write the JSON to a file first.
 
 ```bash
 node <skill_base_directory>/scripts/create-component.mjs - --version <version> <<'EOF'
-<component JSON here>
+<component JSON here, with "_passthrough" included if on the Update Path>
 EOF
 ```
 
 -   The `-` positional argument tells the script to read JSON from stdin.
 -   Use `<<'EOF'` (quoted) so the shell does not interpolate `$` or backticks inside the JSON.
 -   Replace `<version>` with the version number determined in Step 2.
+-   On the **Create Path** (brand-new component), omit `_passthrough` entirely.
 
 ## Step 4 — Remove "last modified" Flag From the Previous Version
 
