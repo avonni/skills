@@ -45,7 +45,6 @@ Each component must use this wrapper:
 
 ```json
 {
-  "id": "uuid-v4",
   "name": "dcPascalCaseName",
   "apiName": "UniqueApiName",
   "value": {
@@ -57,7 +56,7 @@ Each component must use this wrapper:
 
 ### id
 
-Required. UUID v4.
+Do not generate or modify this field — the validation script manages it. If updating an existing component, preserve the existing value. If creating a new component, omit this field.
 
 ### name
 
@@ -170,7 +169,6 @@ Allowed types are `constant`, `formula`, and `variable`.
 ```json
 {
     "apiName": "constant1",
-    "id": "uuid-v4",
     "description": "<Short description of the constant usage>",
     "dataType": "<boolean | date | datetime | number | text>",
     "defaultValue": "<Default value of this constant>",
@@ -178,7 +176,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   All fields are required.
+-   Required fields: `apiName`, `description`, `dataType`, `defaultValue`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
 -   `type` is always equal to "constant".
 
 #### Variable structure
@@ -186,7 +184,6 @@ Allowed types are `constant`, `formula`, and `variable`.
 ```json
 {
     "apiName": "variable1",
-    "id": "uuid-v4",
     "description": "<Short description of the variable>",
     "dataType": "<boolean | date | datetime | number | record | text>",
     "defaultValue": "<Default value of this variable>",
@@ -196,7 +193,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   Required fields: `apiName`, `description`, `dataType`, `id`.
+-   Required fields: `apiName`, `description`, `dataType`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
 -   It is mandatory that `type` is "variable".
 -   If the variable needs to be accessed outside of the Dynamic Component, availability should be set. Its value is an array of strings: `["input"] | ["output"] | ["input","output"]`.
 
@@ -205,7 +202,6 @@ Allowed types are `constant`, `formula`, and `variable`.
 ```json
 {
     "apiName": "formula1",
-    "id": "uuid-v4",
     "description": "<Short description of the formula>",
     "dataType": "<boolean | date | datetime | number | text>",
     "formula": "<Formula value>",
@@ -213,7 +209,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   Required fields: `apiName`, `description`, `dataType`, `formula`, `id`,
+-   Required fields: `apiName`, `description`, `dataType`, `formula`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
 -   It is mandatory that `type` is "formula".
 -   Formula syntax = Salesforce formula functions (`TODAY()`, `ABS()`, `IF()`, etc.)
 

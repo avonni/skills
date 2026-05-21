@@ -36,7 +36,7 @@ If Step 1 returned no records (first-time save), use version `1` and skip Step 4
 
 ## Step 3 — Save the Version File
 
-Pipe the component JSON (generated in the previous skill step) directly into the script via stdin using a heredoc. Do not write the JSON to a file first.
+Pipe the component JSON (generated in the previous skill step) into the save script. Do not write the JSON to a file first. The save script runs validation internally before writing the file.
 
 ```bash
 node <skill_base_directory>/scripts/create-component.mjs - --version <version> <<'EOF'
@@ -44,9 +44,17 @@ node <skill_base_directory>/scripts/create-component.mjs - --version <version> <
 EOF
 ```
 
--   The `-` positional argument tells the script to read JSON from stdin.
 -   Use `<<'EOF'` (quoted) so the shell does not interpolate `$` or backticks inside the JSON.
 -   Replace `<version>` with the version number determined in Step 2.
+-   The save script auto-generates all `id` fields (UUID v4) and validates the structure. If validation fails, it exits with a non-zero code and prints errors to stderr — the file will not be written.
+
+### Handling validation errors
+
+If the save script exits with validation errors:
+
+-   Read each error message carefully.
+-   Fix the component JSON.
+-   Re-run the command.
 
 ## Step 4 — Remove "last modified" Flag From the Previous Version
 

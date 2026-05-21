@@ -52,7 +52,7 @@ function parseFieldValues(xml) {
  */
 function parseJsonArray(raw, fieldName) {
     try {
-        const parsed = JSON.parse(unescapeXml(raw ?? '[]'));
+        const parsed = JSON.parse(unescapeXml(raw || '[]'));
         if (!Array.isArray(parsed)) {
             throw new Error('expected a JSON array');
         }
@@ -121,11 +121,9 @@ function main() {
     const description = fields['avxp__Description__c']
         ? unescapeXml(fields['avxp__Description__c']).trim()
         : '';
-
     const objectApiName = fields['avxp__ObjectApiName__c']
         ? unescapeXml(fields['avxp__ObjectApiName__c']).trim()
         : '';
-
     const value = parseJsonArray(fields['avxp__Value__c'], 'avxp__Value__c');
     const queries = parseJsonArray(
         fields['avxp__Queries__c'],
