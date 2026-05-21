@@ -1,8 +1,74 @@
-# Queries
+# Data Sources
+
+A component's data source is controlled by `itemsTypeSelected`. Three modes exist: `"manual"`, `"query"`, and `"picklistValues"`. The correct binding properties differ per mode — never mix them.
+
+---
+
+## Static Data Source
+
+Use when items are statically defined. No query needed.
+
+A component's `dataSources.static` is an array — each entry is a named collection you must populate separately. Set each one directly in `value` using its `name` as the key.
+
+```json
+{
+    "itemsTypeSelected": "static",
+    "<name1>": [ ... ],
+    "<name2>": [ ... ]
+}
+```
+
+For example, if a component has two static entries (`items` and `resources`), both must be set:
+
+```json
+{
+    "itemsTypeSelected": "static",
+    "items": [
+        {
+            "name": "msg1",
+            "type": "inbound",
+            "date": "2026-01-01T10:00:00Z",
+            "value": "Hello!"
+        }
+    ],
+    "resources": [{ "name": "user1", "label": "Alice" }]
+}
+```
+
+Each entry's shape is defined by its own `properties` array in `dataSources.static`. Only use fields listed there.
+
+---
+
+## Picklist Data Source
+
+Use when items come from a Salesforce picklist field. No query needed.
+
+```json
+{
+    "itemsTypeSelected": "picklistValues",
+    "picklistFieldApiName": "Account.Industry",
+    "picklistRecordType": "Business",
+    "picklistSortOrder": "asc",
+    "picklistValue": "Agriculture;Biotechnology",
+    "picklistControllingValue": "USA"
+}
+```
+
+| Property                   | Required | Description                                                                                                                                      |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `picklistFieldApiName`     | yes      | `"ObjectApiName.FieldApiName"` — the picklist field to load                                                                                      |
+| `picklistRecordType`       | no       | Scopes the picklist to a specific record type                                                                                                    |
+| `picklistSortOrder`        | no       | `"asc"` or `"desc"`                                                                                                                              |
+| `picklistValue`            | no       | Semicolon-delimited allow-list of values to show (all shown if omitted)                                                                          |
+| `picklistControllingValue` | no       | For dependent picklists: the controlling field's current value(s), semicolon-delimited. Filters options to those whose `validFor` index matches. |
+
+---
+
+## Query Data Source
 
 When a component uses a query as its data source, a query definition has to be created. All query definitions must be in top-level `"queries": []`. If no query is used: `"queries": []`.
 
-## Query structure
+### Query Definition
 
 ```json
 {
@@ -23,7 +89,7 @@ When a component uses a query as its data source, a query definition has to be c
 -   `apiName` and `objectApiName` are mandatory. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
 -   `filter`, `filterVariables`, `filterVariablesTypes`, `orderBy` and `queryLimit` are optional.
 
-## Query Filters
+#### Query Filters
 
 `filter` is the SOQL WHERE clause only (no `WHERE` keyword).
 
@@ -32,15 +98,15 @@ When a component uses a query as its data source, a query definition has to be c
 -   If the filter contains any `:variableName` placeholder, you **must** include both `filterVariables` and `filterVariablesTypes`. Every placeholder must exist as a key in both objects — 1:1, exact match.
 -   Never add keys to `filterVariables` and `filterVariablesTypes` that are not referenced in `filter`.
 
-### filterVariables
+#### filterVariables
 
 Maps each placeholder to its runtime value (static value or reference).
 
-### filterVariablesTypes
+#### filterVariablesTypes
 
 Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Number`, `Boolean`, `Date`, `DateTime`, `Double`, `Int`, `Time`, `Id`
 
-### Example — filter with mixed variable types
+#### Example — Filter with Mixed Variable Types
 
 ```json
 {
@@ -64,9 +130,9 @@ Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Nu
 }
 ```
 
-## Query binding (mandatory pattern)
+### Query Binding
 
-When using query data source in a component set inside `value`:
+When using `"itemsTypeSelected": "query"`, set inside `value`:
 
 -   `"itemsTypeSelected": "query"`
 -   `"itemsSObject": "{!$Query.<apiName>}"`

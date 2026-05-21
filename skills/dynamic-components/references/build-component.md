@@ -126,18 +126,10 @@ When processing a component, always check its definition for an additional instr
 ## Data Display Components: `dataSources`
 
 -   If a component definition contains `dataSources`, it is a data display component.
--   Only `manual` and `query` data source types are used. Never generate other types.
--   A component **cannot** use both manual and query at the same time.
-
-### Manual data source
-
-Place data in `value.<manualPropertyName>` where `<manualPropertyName>` comes from `dataSources[].property`. Only use fields defined in the manual datasource schema.
-
-### Query data source
-
--   Do not populate the manual data source property (e.g., do not set `items`).
--   If a component has a query data source, it is mandatory you read and follow the `queries.md` rules.
--   **Special case:** If you are using a `dcTree` and/or a `dcRelationshipGraph` component, it is mandatory you also read and follow the `nested-queries.md` rules.
+-   Three data source types exist: `manual`, `query`, and `picklistValues`. Never generate other types.
+-   A component **cannot** use more than one data source type at the same time.
+-   It is mandatory you read and follow `dataSources.md` to set the correct binding properties for whichever type is needed.
+-   **Special case:** If you are using a `dcTree` and/or a `dcRelationshipGraph` component, it is mandatory you also read and follow `nested-queries.md`.
 
 ## References
 
@@ -228,15 +220,15 @@ All API global variables are of type `string`, referenced using `{!$Api.<name>}`
 
 Variables referenced using `{!$Component.<name>}`.
 
-| Name              | Type       | Availability       |
-| ----------------- | ---------- | ------------------ |
-| `CurrentDate`     | date       | Always             |
-| `CurrentDateTime` | datetime   | Always             |
-| `FormFactor`      | string     | Always             |
-| `Guid`            | string     | Always             |
-| `ObjectApiName`   | string     | Record page only   |
-| `RecordId`        | string     | Record page only   |
-| `Record`          | collection | Record page only   |
+| Name              | Type       | Availability     |
+| ----------------- | ---------- | ---------------- |
+| `CurrentDate`     | date       | Always           |
+| `CurrentDateTime` | datetime   | Always           |
+| `FormFactor`      | string     | Always           |
+| `Guid`            | string     | Always           |
+| `ObjectApiName`   | string     | Record page only |
+| `RecordId`        | string     | Record page only |
+| `Record`          | collection | Record page only |
 
 `ObjectApiName`, `RecordId`, and `Record` are only available when `objectApiName` is set (i.e., the component is placed on a record page). `Record`'s properties are the fields of the current page record. For example, `{!$Component.Record.Name}` references the `Name` field of the current record.
 
