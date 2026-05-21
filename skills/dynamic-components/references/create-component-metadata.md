@@ -34,28 +34,27 @@ If Step 1 returned existing records, stop and present the following options to t
 
 If Step 1 returned no records (first-time save), use version `1` and skip Step 4 — do not ask the user.
 
-## Step 3 — Validate and Save the Version File
+## Step 3 — Save the Version File
 
-Pipe the component JSON (generated in the previous skill step) through the validation script first, then into the save script. Do not write the JSON to a file first.
+Pipe the component JSON (generated in the previous skill step) into the save script. Do not write the JSON to a file first. The save script runs validation internally before writing the file.
 
 ```bash
-node <skill_base_directory>/scripts/validate-component.mjs <<'EOF' | node <skill_base_directory>/scripts/create-component.mjs - --version <version>
+node <skill_base_directory>/scripts/create-component.mjs - --version <version> <<'EOF'
 <component JSON here>
 EOF
 ```
 
 -   Use `<<'EOF'` (quoted) so the shell does not interpolate `$` or backticks inside the JSON.
 -   Replace `<version>` with the version number determined in Step 2.
--   The validation script auto-generates all `id` fields (UUID v4) and checks the structure. If validation fails, it exits with a non-zero code and prints errors to stderr — the save script will not run.
+-   The save script auto-generates all `id` fields (UUID v4) and validates the structure. If validation fails, it exits with a non-zero code and prints errors to stderr — the file will not be written.
 
 ### Handling validation errors
 
-If the validation script exits with errors:
+If the save script exits with validation errors:
 
 -   Read each error message carefully.
 -   Fix the component JSON.
--   Re-run the full pipeline.
--   Do not skip validation or pipe invalid JSON directly into the save script.
+-   Re-run the command.
 
 ## Step 4 — Remove "last modified" Flag From the Previous Version
 

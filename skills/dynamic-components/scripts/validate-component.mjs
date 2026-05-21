@@ -11,6 +11,7 @@
  */
 
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -161,6 +162,59 @@ const errors = [];
 /** @param {string} msg */
 function error(msg) {
     errors.push(msg);
+}
+
+/**
+ * Validates and mutates `data` in place (auto-assigns missing id fields).
+ * @param {Record<string, unknown>} data
+ * @returns {string[]} validation errors (empty array = valid)
+ */
+export function validateComponent(data) {
+    errors.length = 0;
+
+    if (!('apiName' in data)) {
+        error('Missing required top-level field "apiName"');
+    } else {
+        const apiName = /** @type {string} */ (data.apiName);
+        if (!isValidApiName(apiName)) {
+            error(`Top-level apiName "${apiName}": invalid format`);
+        } else if (apiName.length > 30) {
+            error(
+                `Top-level apiName "${apiName}": exceeds 30 characters (${apiName.length})`
+            );
+        }
+    }
+    if (typeof data.description === 'string' && data.description.length > 255) {
+        error(
+            `Top-level description exceeds 255 characters (${data.description.length})`
+        );
+    }
+    for (const field of ['value', 'queries', 'resources']) {
+        if (!(field in data)) error(`Missing required top-level field "${field}"`);
+    }
+
+    if (Array.isArray(data.value)) assignIdsToComponents(data.value);
+    if (Array.isArray(data.queries)) assignIdsToArray(data.queries);
+    if (Array.isArray(data.resources)) assignIdsToArray(data.resources);
+
+    if (Array.isArray(data.value)) {
+        validateComponents(data.value, 'value');
+        collectComponentApiNames(data.value);
+    }
+
+    const queryMap = Array.isArray(data.queries)
+        ? validateQueries(data.queries, 'queries')
+        : new Map();
+
+    if (Array.isArray(data.value)) {
+        validateQueryBindings(data.value, queryMap, 'value');
+    }
+
+    if (Array.isArray(data.resources)) {
+        validateResources(data.resources, 'resources');
+    }
+
+    return [...errors];
 }
 
 // --- apiName uniqueness across the component value tree ---
@@ -1083,61 +1137,13 @@ function main() {
     }
 
     const d = /** @type {Record<string, unknown>} */ (data);
+    const validationErrors = validateComponent(d);
 
-    // Top-level required fields
-    if (!('apiName' in d)) {
-        error('Missing required top-level field "apiName"');
-    } else {
-        const apiName = /** @type {string} */ (d.apiName);
-        if (!isValidApiName(apiName)) {
-            error(`Top-level apiName "${apiName}": invalid format`);
-        } else if (apiName.length > 30) {
-            error(
-                `Top-level apiName "${apiName}": exceeds 30 characters (${apiName.length})`
-            );
-        }
-    }
-    if (typeof d.description === 'string' && d.description.length > 255) {
-        error(
-            `Top-level description exceeds 255 characters (${d.description.length})`
-        );
-    }
-    for (const field of ['value', 'queries', 'resources']) {
-        if (!(field in d)) error(`Missing required top-level field "${field}"`);
-    }
-
-    // Auto-inject id fields before validation
-    if (Array.isArray(d.value)) assignIdsToComponents(d.value);
-    if (Array.isArray(d.queries)) assignIdsToArray(d.queries);
-    if (Array.isArray(d.resources)) assignIdsToArray(d.resources);
-
-    // Component tree
-    if (Array.isArray(d.value)) {
-        validateComponents(d.value, 'value');
-        collectComponentApiNames(d.value);
-    }
-
-    // Queries
-    const queryMap = Array.isArray(d.queries)
-        ? validateQueries(d.queries, 'queries')
-        : new Map();
-
-    // Query bindings
-    if (Array.isArray(d.value)) {
-        validateQueryBindings(d.value, queryMap, 'value');
-    }
-
-    // Resources
-    if (Array.isArray(d.resources)) {
-        validateResources(d.resources, 'resources');
-    }
-
-    // Report
-    if (errors.length > 0) {
+    if (validationErrors.length > 0) {
         process.stderr.write(
-            `Validation failed with ${errors.length} error(s):\n`
+            `Validation failed with ${validationErrors.length} error(s):\n`
         );
-        for (const e of errors) {
+        for (const e of validationErrors) {
             process.stderr.write(`  - ${e}\n`);
         }
         process.exit(1);
@@ -1147,11 +1153,13 @@ function main() {
     process.stderr.write('Validation passed.\n');
 }
 
-try {
-    main();
-} catch (e) {
-    process.stderr.write(
-        `Error: ${e instanceof Error ? e.message : String(e)}\n`
-    );
-    process.exit(1);
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    try {
+        main();
+    } catch (e) {
+        process.stderr.write(
+            `Error: ${e instanceof Error ? e.message : String(e)}\n`
+        );
+        process.exit(1);
+    }
 }
