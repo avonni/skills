@@ -153,6 +153,10 @@ function buildCustomMetadataXml(data, versionNumber) {
         typeof data.description === 'string' ? data.description.trim() : '';
     const hasDescription = description.length > 0;
 
+    const objectApiName =
+        typeof data.objectApiName === 'string' ? data.objectApiName.trim() : '';
+    const hasObjectApiName = objectApiName.length > 0;
+
     const label = labelFromApiName(apiName);
     const createdAt = formatCreatedDateTimeUtc();
 
@@ -182,6 +186,15 @@ function buildCustomMetadataXml(data, versionNumber) {
         valuesBlockDateTimeField('LastModifiedDateTime__c', createdAt)
     );
 
+    if (hasObjectApiName) {
+        parts.push(
+            valuesBlockStringField(
+                'ObjectApiName__c',
+                escapeXmlString(objectApiName)
+            )
+        );
+    }
+
     parts.push(
         valuesBlockStringField(
             'Queries__c',
@@ -203,7 +216,6 @@ function buildCustomMetadataXml(data, versionNumber) {
 
     return parts.join('\n');
 }
-
 
 function parseArgs(argv) {
     /** @type {string | undefined} */
@@ -284,7 +296,9 @@ function main() {
 
     const xml = buildCustomMetadataXml(data, versionNumber);
     const apiName = data.apiName;
-    const fileName = `${addNamespace('AvonniDynamicComponent')}.${apiName}_${versionNumber}.md-meta.xml`;
+    const fileName = `${addNamespace(
+        'AvonniDynamicComponent'
+    )}.${apiName}_${versionNumber}.md-meta.xml`;
     const outPath = join(outDir, fileName);
 
     mkdirSync(outDir, { recursive: true });

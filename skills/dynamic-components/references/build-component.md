@@ -10,6 +10,7 @@ Return exactly this JSON output:
 {
     "apiName": "Component_API_Name",
     "description": "Description of the component purpose",
+    "objectApiName": "Account",
     "value": [
         /* one or more root component wrappers */
     ],
@@ -25,6 +26,7 @@ Return exactly this JSON output:
 -   If no queries/resources/value is needed, return empty arrays: `"queries": []`, `"resources": []`, `"value": []`.
 -   `apiName` is required (max 30 characters). It serves as the title of the component. For example, "Account_Dashboard".
 -   `description` is optional (max 255 characters). It serves as the description of the component. For example, "A dashboard that displays account details".
+-   `objectApiName` is optional. Set it to the Salesforce object API name (e.g., `"Account"`) when the component is placed on a record page. Omit it otherwise.
 
 ## API Name Rules (Global)
 
@@ -138,13 +140,32 @@ Place data in `value.<manualPropertyName>` where `<manualPropertyName>` comes fr
 -   If a component has a query data source, it is mandatory you read and follow the `queries.md` rules.
 -   **Special case:** If you are using a `dcTree` and/or a `dcRelationshipGraph` component, it is mandatory you also read and follow the `nested-queries.md` rules.
 
-## Resources
+## References
+
+References are pointers to other elements that you can use as values. They follow different patterns:
+
+-   Component property: `{!<componentApiName>.<propertyName>}` (e.g. `{!Combobox1.value}`);
+-   Query: `{!$Query.<apiName>}` (e.g. `{!Query.GetCanadianAccounts}`).
+-   Resource: `{!<resourceApiName>}` (e.g. `{!constant1}`).
+-   Global references: `{!$<category>.<referenceName>}` (e.g. `{!$Organization.City}`).
+
+### Component property reference
+
+A component can reference the value of another component's property using the pattern `{!componentApiName.componentProperty}`.
+For example, `{!dcHeader1.title}` is a reference to the value of the `title` property of the `dcHeader1` component.
+If a property has an object as a value, it is possible to reference the value of one of its keys. For example, `{!dcDatatable1.firstSelectedRowSObject.Name}` is a reference to the `Name` key of the `firstSelectedRowSObject` object value, of the `dcDatatable1` component.
+
+### Query
+
+Reference to a query is only allowed for query data source (see **Query data source** section).
+
+### Resources
 
 Resources are reusable references to a value.
 All resources must be in top-level `"resources": []`. If none: `"resources": []`.
 Allowed types are `constant`, `formula`, and `variable`.
 
-### Constant structure
+#### Constant structure
 
 ```json
 {
@@ -160,7 +181,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 -   All fields are required.
 -   `type` is always equal to "constant".
 
-### Variable structure
+#### Variable structure
 
 ```json
 {
@@ -179,7 +200,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 -   It is mandatory that `type` is "variable".
 -   If the variable needs to be accessed outside of the Dynamic Component, availability should be set. Its value is an array of strings: `["input"] | ["output"] | ["input","output"]`.
 
-### Formula structure
+#### Formula structure
 
 ```json
 {
@@ -196,21 +217,82 @@ Allowed types are `constant`, `formula`, and `variable`.
 -   It is mandatory that `type` is "formula".
 -   Formula syntax = Salesforce formula functions (`TODAY()`, `ABS()`, `IF()`, etc.)
 
-### Resource references
+### Global references
 
-To reference a resource in a component property, use the pattern `{!resourceApiName}`.
+Reference to a variable related to the user, the Salesforce org, the dynamic component settings, etc. Pattern: `{!$<Category>.<referenceName>}`.
 
-Do not confuse:
+#### API
 
--   Resource: `{!myVariable}`
--   Query: `{!$Query.getAccounts}`
--   Component property: `{!Combobox1.value}`
+All API global variables are of type `string`, referenced using `{!$Api.<name>}`.
 
-## Component property reference
+-   **Enterprise Server URLs:** `Enterprise_Server_URL_<version>` — `<version>` starts at 25, then increments by 10 up to 610.
+-   **Partner Server URLs:** `Partner_Server_URL_<version>` — same range.
 
-A component can reference the value of another component's property using the pattern `{!componentApiName.componentProperty}`.
-For example, `{!dcHeader1.title}` is a reference to the value of the `title` property of the `dcHeader1` component.
-If a property has an object as a value, it is possible to reference the value of one of its keys. For example, `{!dcDatatable1.firstSelectedRowSObject.Name}` is a reference to the `Name` key of the `firstSelectedRowSObject` object value, of the `dcDatatable1` component.
+#### Component
+
+Variables referenced using `{!$Component.<name>}`.
+
+| Name              | Type       | Availability       |
+| ----------------- | ---------- | ------------------ |
+| `CurrentDate`     | date       | Always             |
+| `CurrentDateTime` | datetime   | Always             |
+| `FormFactor`      | string     | Always             |
+| `Guid`            | string     | Always             |
+| `ObjectApiName`   | string     | Record page only   |
+| `RecordId`        | string     | Record page only   |
+| `Record`          | collection | Record page only   |
+
+`ObjectApiName`, `RecordId`, and `Record` are only available when `objectApiName` is set (i.e., the component is placed on a record page). `Record`'s properties are the fields of the current page record. For example, `{!$Component.Record.Name}` references the `Name` field of the current record.
+
+#### GlobalConstant
+
+Constants referenced using `{!$GlobalConstant.<name>}`.
+
+| Name          | Type    | Value   |
+| ------------- | ------- | ------- |
+| `EmptyString` | string  | `""`    |
+| `False`       | boolean | `false` |
+| `True`        | boolean | `true`  |
+| `Null`        | string  | `null`  |
+
+`{!$GlobalConstant.FormFactor}` — collection.
+
+| Name                                    | Type   | Value      |
+| --------------------------------------- | ------ | ---------- |
+| `{!$GlobalConstant.FormFactor.Phone}`   | string | `"Small"`  |
+| `{!$GlobalConstant.FormFactor.Tablet}`  | string | `"Medium"` |
+| `{!$GlobalConstant.FormFactor.Desktop}` | string | `"Large"`  |
+
+`{!$GlobalConstant.Flow}` — collection.
+
+| Name                                      | Type   | Value        |
+| ----------------------------------------- | ------ | ------------ |
+| `{!$GlobalConstant.Flow.Status.Started}`  | string | `"STARTED"`  |
+| `{!$GlobalConstant.Flow.Status.Paused}`   | string | `"PAUSED"`   |
+| `{!$GlobalConstant.Flow.Status.Finished}` | string | `"FINISHED"` |
+| `{!$GlobalConstant.Flow.Status.Error}`    | string | `"ERROR"`    |
+
+#### Location
+
+Variables referenced using `{!$Location.<name>}`.
+
+| Name                        | Type    |
+| --------------------------- | ------- |
+| `IsAvailable`               | boolean |
+| `CurrentPosition.Latitude`  | number  |
+| `CurrentPosition.Longitude` | number  |
+
+#### Organization, Profile, User, UserRole
+
+These categories expose the fields of their corresponding Salesforce object as variables. For example, `{!$Organization.City}` or `{!$User.FirstName}`.
+
+#### Permission
+
+`{!$Permission.<DeveloperName>}` — references a Custom Permission by its developer name. Returns a boolean indicating whether the current user has that permission.
+
+#### System
+
+Only `{!$System.OriginDateTime}` is available (type: `datetime`).
 
 ## Styling (`inlineStyle`)
 
@@ -253,7 +335,7 @@ Before producing final code, verify:
 
 If any check fails, fix it before output.
 
-### Unknown or Ambiguous request
+### Unknown or Ambiguous Request
 
 -   Never generate JSON with missing required fields or invented values. A response with incomplete required fields is always worse than asking a clarifying question first.
 -   Never generate a component wrapper, property key, or icon value that is not explicitly defined in the documentation, even if the name seems plausible or close to an existing one.
