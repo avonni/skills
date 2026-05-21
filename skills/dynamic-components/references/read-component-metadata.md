@@ -11,7 +11,7 @@ Your goal is to read an existing Dynamic Component metadata file and present its
 node <skill_base_directory>/scripts/read-component.mjs <path-to.md-meta.xml>
 ```
 
-3. Use the JSON printed on stdout directly — do not write it to disk.
+3. The JSON printed on stdout contains a `_passthrough` field alongside the structured component data (`apiName`, `value`, `queries`, `resources`, etc.). Save the entire `_passthrough` object in memory — you will need to inject it back into the component JSON before saving in a later step.
 4. Present the current component structure to the user as a natural-language plan.
 
 ## Present the Current Component Plan

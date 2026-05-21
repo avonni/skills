@@ -11,8 +11,17 @@
  * If --out-dir is omitted, writes under ./force-app/main/default/customMetadata
  * relative to the current working directory (run from repo root or pass --out-dir).
  *
- * Author attribution relies on Salesforce's auto-populated CreatedById /
- * LastModifiedById at deploy time — no custom name fields are written.
+ * Fields managed by this script (always written with fresh values):
+ *   DynamicComponentName__c, IsLastModified__c, LastModifiedDateTime__c,
+ *   VersionNumber__c, Value__c, Queries__c, Resources__c,
+ *   Description__c (when present), ObjectApiName__c (when present).
+ *
+ * Fields with defaults (taken from _passthrough when available, otherwise defaulted):
+ *   CreatedDateTime__c → now, Status__c → "Inactive".
+ *
+ * All other fields in _passthrough are written verbatim, preserving their xsi:type.
+ * This means any field added to the object in the future is automatically preserved
+ * on update without any script changes.
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -44,28 +53,18 @@ function escapeXmlString(s) {
  * @returns {boolean}
  */
 function isValidApiName(name) {
-    if (typeof name !== 'string' || name.length === 0) {
-        return false;
-    }
-    if (!/^[A-Za-z]/.test(name)) {
-        return false;
-    }
-    if (!/^[A-Za-z0-9_]+$/.test(name)) {
-        return false;
-    }
-    if (name.endsWith('_')) {
-        return false;
-    }
-    if (name.includes('__')) {
-        return false;
-    }
+    if (typeof name !== 'string' || name.length === 0) return false;
+    if (!/^[A-Za-z]/.test(name)) return false;
+    if (!/^[A-Za-z0-9_]+$/.test(name)) return false;
+    if (name.endsWith('_')) return false;
+    if (name.includes('__')) return false;
     return true;
 }
 
 /**
  * @returns {string}
  */
-function formatCreatedDateTimeUtc() {
+function nowUtc() {
     const d = new Date();
     const y = d.getUTCFullYear();
     const mo = String(d.getUTCMonth() + 1).padStart(2, '0');
@@ -76,8 +75,12 @@ function formatCreatedDateTimeUtc() {
     return `${y}-${mo}-${day}T${h}:${mi}:${s}.000Z`;
 }
 
-function addNamespace(fieldName) {
-    return NAMESPACE ? `${NAMESPACE}__${fieldName}` : fieldName;
+/**
+ * @param {string} localName field name without namespace prefix
+ * @returns {string}
+ */
+function addNamespace(localName) {
+    return NAMESPACE ? `${NAMESPACE}__${localName}` : localName;
 }
 
 /**
@@ -89,52 +92,47 @@ function labelFromApiName(apiName) {
 }
 
 /**
- * @param {string} fieldName
- * @param {string} innerValue
+ * Generic <values> block — accepts the full qualified field name and xsi:type.
+ * innerValue must already be XML-escaped.
+ * @param {string} fieldName fully-qualified field name (e.g. avxp__Status__c)
+ * @param {string} type xsi:type value (e.g. xsd:string)
+ * @param {string} innerValue XML-escaped value text
  * @returns {string}
  */
-function valuesBlockStringField(fieldName, innerValue) {
+function valuesBlock(fieldName, type, innerValue) {
     return `    <values>
-        <field>${addNamespace(fieldName)}</field>
-        <value xsi:type="xsd:string">${innerValue}</value>
+        <field>${fieldName}</field>
+        <value xsi:type="${type}">${innerValue}</value>
     </values>`;
 }
 
-/**
- * @param {string} fieldName
- * @param {string} innerValue
- * @returns {string}
- */
-function valuesBlockDateTimeField(fieldName, innerValue) {
-    return `    <values>
-        <field>${addNamespace(fieldName)}</field>
-        <value xsi:type="xsd:dateTime">${innerValue}</value>
-    </values>`;
-}
+// Convenience wrappers that apply the namespace prefix and correct xsi:type.
+const str = (localName, v) =>
+    valuesBlock(addNamespace(localName), 'xsd:string', v);
+const dt = (localName, v) =>
+    valuesBlock(addNamespace(localName), 'xsd:dateTime', v);
+const bool = (localName, v) =>
+    valuesBlock(addNamespace(localName), 'xsd:boolean', String(v));
+const dbl = (localName, v) =>
+    valuesBlock(addNamespace(localName), 'xsd:double', String(v));
 
-/**
- * @param {string} fieldName
- * @param {boolean} bool
- * @returns {string}
- */
-function valuesBlockBooleanField(fieldName, bool) {
-    return `    <values>
-        <field>${addNamespace(fieldName)}</field>
-        <value xsi:type="xsd:boolean">${bool}</value>
-    </values>`;
-}
-
-/**
- * @param {string} fieldName
- * @param {string} doubleText literal xsd:double text (e.g. "1.0")
- * @returns {string}
- */
-function valuesBlockDoubleField(fieldName, doubleText) {
-    return `    <values>
-        <field>${addNamespace(fieldName)}</field>
-        <value xsi:type="xsd:double">${doubleText}</value>
-    </values>`;
-}
+// Fields this script writes explicitly — skipped when emitting _passthrough entries
+// to avoid duplicates.
+const MANAGED_FIELDS = new Set(
+    [
+        'CreatedDateTime__c',
+        'Description__c',
+        'DynamicComponentName__c',
+        'IsLastModified__c',
+        'LastModifiedDateTime__c',
+        'ObjectApiName__c',
+        'Queries__c',
+        'Resources__c',
+        'Status__c',
+        'Value__c',
+        'VersionNumber__c'
+    ].map(addNamespace)
+);
 
 /**
  * @param {unknown} data
@@ -149,65 +147,66 @@ function buildCustomMetadataXml(data, versionNumber) {
 
     const description =
         typeof data.description === 'string' ? data.description.trim() : '';
-    const hasDescription = description.length > 0;
-
     const objectApiName =
         typeof data.objectApiName === 'string' ? data.objectApiName.trim() : '';
-    const hasObjectApiName = objectApiName.length > 0;
+
+    // _passthrough carries fields read from an existing file that this script
+    // does not regenerate. Each entry is { type: string, value: string } where
+    // value is unescaped.
+    /** @type {Record<string, { type: string, value: string }>} */
+    const passthrough = data._passthrough ?? {};
+
+    const now = nowUtc();
+
+    // CreatedDateTime__c: preserve from passthrough (update case) or use now (create case).
+    const createdAt =
+        passthrough[addNamespace('CreatedDateTime__c')]?.value ?? now;
+
+    // Status__c: preserve from passthrough or default to Inactive.
+    const status = passthrough[addNamespace('Status__c')]?.value ?? 'Inactive';
 
     const label = labelFromApiName(apiName);
-    const createdAt = formatCreatedDateTimeUtc();
 
     const parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         `<CustomMetadata xmlns="${CUSTOM_METADATA_NS}" xmlns:xsi="${XSI_NS}" xmlns:xsd="${XSD_NS}">`,
         `    <label>${escapeXmlString(label)}</label>`,
         '    <protected>false</protected>',
-        valuesBlockDateTimeField('CreatedDateTime__c', createdAt)
+        dt('CreatedDateTime__c', createdAt)
     ];
 
-    if (hasDescription) {
-        parts.push(
-            valuesBlockStringField(
-                'Description__c',
-                escapeXmlString(description)
-            )
-        );
+    if (description) {
+        parts.push(str('Description__c', escapeXmlString(description)));
     }
 
     parts.push(
-        valuesBlockStringField(
-            'DynamicComponentName__c',
-            escapeXmlString(apiName)
-        ),
-        valuesBlockBooleanField('IsLastModified__c', true),
-        valuesBlockDateTimeField('LastModifiedDateTime__c', createdAt)
+        str('DynamicComponentName__c', escapeXmlString(apiName)),
+        bool('IsLastModified__c', true),
+        dt('LastModifiedDateTime__c', now)
     );
 
-    if (hasObjectApiName) {
-        parts.push(
-            valuesBlockStringField(
-                'ObjectApiName__c',
-                escapeXmlString(objectApiName)
-            )
-        );
+    if (objectApiName) {
+        parts.push(str('ObjectApiName__c', escapeXmlString(objectApiName)));
     }
 
     parts.push(
-        valuesBlockStringField(
-            'Queries__c',
-            escapeXmlString(JSON.stringify(queries))
-        ),
-        valuesBlockStringField(
-            'Resources__c',
-            escapeXmlString(JSON.stringify(resources))
-        ),
-        valuesBlockStringField('Status__c', escapeXmlString('Inactive')),
-        valuesBlockStringField(
-            'Value__c',
-            escapeXmlString(JSON.stringify(value))
-        ),
-        valuesBlockDoubleField('VersionNumber__c', String(versionNumber)),
+        str('Queries__c', escapeXmlString(JSON.stringify(queries))),
+        str('Resources__c', escapeXmlString(JSON.stringify(resources))),
+        str('Status__c', escapeXmlString(status))
+    );
+
+    // Emit all passthrough fields that this script does not manage explicitly.
+    // Sorted for deterministic output.
+    for (const fieldName of Object.keys(passthrough).sort()) {
+        if (!MANAGED_FIELDS.has(fieldName)) {
+            const { type, value: raw } = passthrough[fieldName];
+            parts.push(valuesBlock(fieldName, type, escapeXmlString(raw)));
+        }
+    }
+
+    parts.push(
+        str('Value__c', escapeXmlString(JSON.stringify(value))),
+        dbl('VersionNumber__c', versionNumber),
         '</CustomMetadata>',
         ''
     );

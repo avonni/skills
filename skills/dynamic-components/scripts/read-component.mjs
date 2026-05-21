@@ -6,12 +6,23 @@
  * Usage:
  *   node read-component.mjs <path-to.md-meta.xml> [--out <output.json>]
  *
- * Writes { apiName, description, value, queries, resources } as JSON.
- * Outputs to stdout if --out is omitted.
+ * Outputs { apiName, description?, objectApiName?, value, queries, resources, _passthrough? }.
+ * _passthrough carries every other <values> field verbatim (with its xsi:type) so they
+ * survive a round-trip through create-component.mjs without any field-by-field handling.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+
+const NAMESPACE = 'avxp';
+
+/**
+ * @param {string} localName field name without namespace prefix
+ * @returns {string}
+ */
+function addNamespace(localName) {
+    return NAMESPACE ? `${NAMESPACE}__${localName}` : localName;
+}
 
 /**
  * @param {string} str
@@ -26,9 +37,11 @@ function unescapeXml(str) {
 }
 
 /**
- * Extracts all <values> blocks from the XML and returns a map of field name → raw inner text.
+ * Extracts all <values> blocks from the XML.
+ * Returns a map of field name → { rawValue: string, type: string }.
+ * rawValue is the XML-escaped text inside <value>; type is the xsi:type attribute value.
  * @param {string} xml
- * @returns {Record<string, string>}
+ * @returns {Record<string, { rawValue: string, type: string }>}
  */
 function parseFieldValues(xml) {
     const fields = {};
@@ -38,15 +51,19 @@ function parseFieldValues(xml) {
         const inner = block[1];
         const fieldMatch = /<field>([^<]+)<\/field>/.exec(inner);
         const valueMatch = /<value[^>]*>([\s\S]*?)<\/value>/.exec(inner);
+        const typeMatch = /<value[^>]*xsi:type="([^"]*)"/.exec(inner);
         if (fieldMatch && valueMatch) {
-            fields[fieldMatch[1].trim()] = valueMatch[1];
+            fields[fieldMatch[1].trim()] = {
+                rawValue: valueMatch[1],
+                type: typeMatch ? typeMatch[1] : 'xsd:string'
+            };
         }
     }
     return fields;
 }
 
 /**
- * @param {string} raw XML-escaped JSON string, or undefined
+ * @param {string | undefined} raw XML-escaped JSON string
  * @param {string} fieldName used in error messages
  * @returns {unknown[]}
  */
@@ -65,6 +82,18 @@ function parseJsonArray(raw, fieldName) {
         );
     }
 }
+
+// Fields extracted as structured output — excluded from _passthrough.
+const STRUCTURED_FIELDS = new Set(
+    [
+        'DynamicComponentName__c',
+        'Description__c',
+        'ObjectApiName__c',
+        'Value__c',
+        'Queries__c',
+        'Resources__c'
+    ].map(addNamespace)
+);
 
 function parseArgs(argv) {
     /** @type {string | undefined} */
@@ -110,36 +139,51 @@ function main() {
     const fields = parseFieldValues(xml);
 
     const apiName = unescapeXml(
-        fields['avxp__DynamicComponentName__c'] ?? ''
+        fields[addNamespace('DynamicComponentName__c')]?.rawValue ?? ''
     ).trim();
     if (!apiName) {
         throw new Error(
-            'Could not find avxp__DynamicComponentName__c in the metadata file.'
+            `Could not find ${addNamespace(
+                'DynamicComponentName__c'
+            )} in the metadata file.`
         );
     }
 
-    const description = fields['avxp__Description__c']
-        ? unescapeXml(fields['avxp__Description__c']).trim()
+    const description = fields[addNamespace('Description__c')]
+        ? unescapeXml(fields[addNamespace('Description__c')].rawValue).trim()
         : '';
-    const objectApiName = fields['avxp__ObjectApiName__c']
-        ? unescapeXml(fields['avxp__ObjectApiName__c']).trim()
+
+    const objectApiName = fields[addNamespace('ObjectApiName__c')]
+        ? unescapeXml(fields[addNamespace('ObjectApiName__c')].rawValue).trim()
         : '';
-    const value = parseJsonArray(fields['avxp__Value__c'], 'avxp__Value__c');
+
+    const value = parseJsonArray(
+        fields[addNamespace('Value__c')]?.rawValue,
+        addNamespace('Value__c')
+    );
     const queries = parseJsonArray(
-        fields['avxp__Queries__c'],
-        'avxp__Queries__c'
+        fields[addNamespace('Queries__c')]?.rawValue,
+        addNamespace('Queries__c')
     );
     const resources = parseJsonArray(
-        fields['avxp__Resources__c'],
-        'avxp__Resources__c'
+        fields[addNamespace('Resources__c')]?.rawValue,
+        addNamespace('Resources__c')
     );
 
     const result = { apiName, value, queries, resources };
-    if (description) {
-        result.description = description;
+    if (description) result.description = description;
+    if (objectApiName) result.objectApiName = objectApiName;
+
+    // Collect all remaining fields as opaque passthrough so they survive a
+    // round-trip through create-component.mjs without any field-by-field handling.
+    const passthrough = {};
+    for (const [fieldName, { rawValue, type }] of Object.entries(fields)) {
+        if (!STRUCTURED_FIELDS.has(fieldName)) {
+            passthrough[fieldName] = { type, value: unescapeXml(rawValue) };
+        }
     }
-    if (objectApiName) {
-        result.objectApiName = objectApiName;
+    if (Object.keys(passthrough).length > 0) {
+        result._passthrough = passthrough;
     }
 
     const output = JSON.stringify(result, null, 4);

@@ -26,6 +26,7 @@ From the results:
 If Step 1 returned existing records, stop and present the following options to the user. Use this exact format so they can reply with just a number:
 
 > How do you want to save this component?
+>
 > 1. Create a new version (version `<nextVersion>`) — default
 > 2. Update the current version (version `<currentVersion>`) directly
 
@@ -36,16 +37,19 @@ If Step 1 returned no records (first-time save), use version `1` and skip Step 4
 
 ## Step 3 — Save the Version File
 
+Before saving, check whether you are on the **Update Path** (i.e., you read an existing metadata file earlier in this session). If so, the read script produced a `_passthrough` object that must be merged back into the component JSON. Add it as a top-level `"_passthrough"` key so that fields not managed by the build process (status, style classes, interactions, audit timestamps, etc.) are preserved in the output file.
+
 Pipe the component JSON (generated in the previous skill step) into the save script. Do not write the JSON to a file first. The save script runs validation internally before writing the file.
 
 ```bash
 node <skill_base_directory>/scripts/create-component.mjs - --version <version> <<'EOF'
-<component JSON here>
+<component JSON here, with "_passthrough" included if on the Update Path>
 EOF
 ```
 
 -   Use `<<'EOF'` (quoted) so the shell does not interpolate `$` or backticks inside the JSON.
 -   Replace `<version>` with the version number determined in Step 2.
+-   On the **Create Path** (brand-new component), omit `_passthrough` entirely.
 -   The save script auto-generates all `id` fields (UUID v4) and validates the structure. If validation fails, it exits with a non-zero code and prints errors to stderr — the file will not be written.
 
 ### Handling validation errors
