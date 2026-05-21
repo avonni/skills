@@ -1,6 +1,10 @@
 ---
 name: dynamic-components
-description: Create or update Avonni Dynamic Components.
+description: Create or update Avonni Dynamic Components. Use when the user asks to build, generate, or modify a dynamic component, or when working with Dynamic Component JSON, queries, resources, or metadata files.
+license: MIT
+compatibility: Requires Node.js >=18, the Avonni MCP server (dynamic toolset), and Salesforce CLI.
+metadata:
+    version: '1.0'
 ---
 
 # avonni-dynamic-components
