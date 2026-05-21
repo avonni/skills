@@ -147,6 +147,10 @@ function buildCustomMetadataXml(data, versionNumber) {
         typeof data.description === 'string' ? data.description.trim() : '';
     const hasDescription = description.length > 0;
 
+    const objectApiName =
+        typeof data.objectApiName === 'string' ? data.objectApiName.trim() : '';
+    const hasObjectApiName = objectApiName.length > 0;
+
     const label = labelFromApiName(apiName);
     const createdAt = formatCreatedDateTimeUtc();
 
@@ -175,6 +179,15 @@ function buildCustomMetadataXml(data, versionNumber) {
         valuesBlockBooleanField('IsLastModified__c', true),
         valuesBlockDateTimeField('LastModifiedDateTime__c', createdAt)
     );
+
+    if (hasObjectApiName) {
+        parts.push(
+            valuesBlockStringField(
+                'ObjectApiName__c',
+                escapeXmlString(objectApiName)
+            )
+        );
+    }
 
     parts.push(
         valuesBlockStringField(

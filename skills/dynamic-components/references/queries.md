@@ -34,12 +34,7 @@ When a component uses a query as its data source, a query definition has to be c
 
 ### filterVariables
 
-Maps each placeholder to its runtime value. Allowed values:
-
--   Static values: `"Agriculture"`, `42`, `true`
--   Reference to another component: `"{!Combobox1.value}"`
--   Global reference: `"{!$Component.CurrentDate}"`
--   Reference to a resource: `"{!myVariable}"`
+Maps each placeholder to its runtime value (static value or reference).
 
 ### filterVariablesTypes
 
@@ -56,7 +51,7 @@ Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Nu
         "variable1item0": "Agriculture",
         "variable1item1": "Biotechnology",
         "variable1item2": "Chemicals",
-        "variable2": "{!$Component.ObjectApiName}",
+        "variable2": "{!$GlobalConstant.EmptyString}",
         "variable3": "2026-03-24T05:41:41Z"
     },
     "filterVariablesTypes": {
@@ -77,4 +72,7 @@ When using query data source in a component set inside `value`:
 -   `"itemsSObject": "{!$Query.<apiName>}"`
 -   `"itemsSObjectApiName": "<ObjectApiName>"` — must always equal the `objectApiName` of the referenced query
 -   `"nbItems": "{!$Query.<apiName>.nbItems}"`
--   `"itemsSObjectMapping": { ... }` — uses `{{Record.FieldName}}`
+-   `"itemsSObjectMapping": { ... }` — maps each component item key to its value. Each key can be set to:
+    -   A static value: `"iconName": "standard:account"`
+    -   A record field: `"label": "{{Record.Name}}"`
+    -   A mix of both: `"description": "They live in {{Record.BillingCity}}"`

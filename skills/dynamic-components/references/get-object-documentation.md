@@ -21,12 +21,7 @@ If the command succeeds, cache the result and use it directly. Do not call the s
 
 ## Command Syntax (Mandatory)
 
-When running a command:
-
--   Do not add pipes (|, | head, | tail, | grep, etc.).
--   Do not add redirections (2>/dev/null, > file, etc.).
--   Do not add extra flags unless you explicitly document them.
--   Do not truncate the list as it can hide valid API names.
+Run the commands exactly as written — do not modify, extend, or truncate them. Truncating the output can hide valid API names.
 
 ## Error handling
 

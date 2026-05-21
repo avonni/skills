@@ -121,7 +121,9 @@ function main() {
     const description = fields['avxp__Description__c']
         ? unescapeXml(fields['avxp__Description__c']).trim()
         : '';
-
+    const objectApiName = fields['avxp__ObjectApiName__c']
+        ? unescapeXml(fields['avxp__ObjectApiName__c']).trim()
+        : '';
     const value = parseJsonArray(fields['avxp__Value__c'], 'avxp__Value__c');
     const queries = parseJsonArray(
         fields['avxp__Queries__c'],
@@ -132,11 +134,15 @@ function main() {
         'avxp__Resources__c'
     );
 
-    const output = JSON.stringify(
-        { apiName, description, value, queries, resources },
-        null,
-        4
-    );
+    const result = { apiName, value, queries, resources };
+    if (description) {
+        result.description = description;
+    }
+    if (objectApiName) {
+        result.objectApiName = objectApiName;
+    }
+
+    const output = JSON.stringify(result, null, 4);
 
     if (outPath) {
         writeFileSync(outPath, output, 'utf8');
