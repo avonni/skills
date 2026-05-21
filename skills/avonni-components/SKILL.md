@@ -4,6 +4,10 @@ description: >
     Integrate Avonni components into the code of an LWC component (HTML, JS, CSS).
     Covers MCP tool usage, attribute/event/type/slot resolution, styling hooks, and validation — not general LWC creation.
     Trigger when: user asks to add, use, or style an Avonni component in their code; when writing or editing LWC that references avonni-* tags; when the user mentions a component name that starts with "avonni-".
+license: MIT
+compatibility: 'Requires the Avonni MCP server (avonni toolset)'
+metadata:
+    version: '1.0'
 ---
 
 # avonni-components

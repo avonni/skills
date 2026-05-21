@@ -25,7 +25,11 @@
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { validateComponent } from './validate-component.mjs';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const CUSTOM_METADATA_NS = 'http://soap.sforce.com/2006/04/metadata';
 const XSI_NS = 'http://www.w3.org/2001/XMLSchema-instance';
@@ -137,12 +141,6 @@ const MANAGED_FIELDS = new Set(
  */
 function buildCustomMetadataXml(data, versionNumber) {
     const apiName = data.apiName;
-    if (!isValidApiName(apiName)) {
-        throw new Error(
-            'Invalid or missing apiName: must start with a letter, use only letters, digits, and single underscores (no trailing or double underscore).'
-        );
-    }
-
     const queries = Array.isArray(data.queries) ? data.queries : [];
     const resources = Array.isArray(data.resources) ? data.resources : [];
     const value = Array.isArray(data.value) ? data.value : [];
@@ -292,6 +290,20 @@ function main() {
     if (data === null || typeof data !== 'object' || Array.isArray(data)) {
         throw new Error('JSON root must be an object');
     }
+
+    const validationErrors = validateComponent(
+        /** @type {Record<string, unknown>} */ (data)
+    );
+    if (validationErrors.length > 0) {
+        process.stderr.write(
+            `Validation failed with ${validationErrors.length} error(s):\n`
+        );
+        for (const e of validationErrors) {
+            process.stderr.write(`  - ${e}\n`);
+        }
+        process.exit(1);
+    }
+    process.stderr.write('Validation passed.\n');
 
     const xml = buildCustomMetadataXml(data, versionNumber);
     const apiName = data.apiName;
