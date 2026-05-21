@@ -175,6 +175,19 @@ describe('Read Component XML', () => {
             assert.equal(json.apiName, 'MyComponent');
         });
 
+        test('objectApiName extracted when present', () => {
+            const { json } = pass({
+                ...MINIMAL_FIELDS,
+                avxp__ObjectApiName__c: 'Account'
+            });
+            assert.equal(json.objectApiName, 'Account');
+        });
+
+        test('objectApiName is empty when field is absent', () => {
+            const { json } = pass(MINIMAL_FIELDS);
+            assert.equal(json.objectApiName, undefined);
+        });
+
         test('description extracted when present', () => {
             const { json } = pass({
                 ...MINIMAL_FIELDS,
@@ -183,9 +196,9 @@ describe('Read Component XML', () => {
             assert.equal(json.description, 'A useful component');
         });
 
-        test('description is empty string when field is absent', () => {
+        test('description is empty when field is absent', () => {
             const { json } = pass(MINIMAL_FIELDS);
-            assert.equal(json.description, '');
+            assert.equal(json.description, undefined);
         });
 
         test('value array parsed from Value__c', () => {
@@ -391,7 +404,6 @@ describe('Read Component XML', () => {
         test('output JSON has the expected top-level keys', () => {
             const { json } = pass(MINIMAL_FIELDS);
             assert.ok('apiName' in json);
-            assert.ok('description' in json);
             assert.ok('value' in json);
             assert.ok('queries' in json);
             assert.ok('resources' in json);
