@@ -10,9 +10,9 @@ description: >
 
 Use this skill whenever Avonni components need to be added to or used inside an LWC component. It governs how to discover, configure, and validate Avonni components through the MCP — not how to scaffold the surrounding LWC.
 
-## Package
+## Toolset
 
-This skill works exclusively with the **`dev` package** of the Avonni MCP. All MCP tool calls must include `package: "dev"` where applicable. Do not use this skill for Dynamic Components (use the `dynamic-components` skill instead).
+This skill works exclusively with the **`dev` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "dev"` where applicable. Do not use this skill for Dynamic Components (use the `dynamic-components` skill instead).
 
 ## Authority
 
@@ -25,12 +25,12 @@ This skill works exclusively with the **`dev` package** of the Avonni MCP. All M
 ## Steps
 
 1. **Understand the request** — Identify what functionality is needed and which Avonni components may be involved.
-2. **Call `list_components`** with `package: "dev"` — Get the current list of available components. Never skip this.
+2. **Call `list_components`** with `toolset: "dev"` — Get the current list of available components. Never skip this.
 3. **Select components** — Choose the component(s) that best satisfy the request using the selection criteria below.
-4. **Call `get_component_docs`** with `package: "dev"` for each selected component — one call per component, never reuse docs across components.
+4. **Call `get_component_docs`** with `toolset: "dev"` for each selected component — one call per component, never reuse docs across components.
 5. **Call `get_type`** for every non-primitive type referenced in attributes, events, or return values.
 6. **Resolve nested types recursively** — repeat `get_type` until all types are fully known.
-7. **Call `get_component_styles`** with `package: "dev"` for each component that needs styling — only if the user request involves CSS or visual customization.
+7. **Call `get_component_styles`** with `toolset: "dev"` for each component that needs styling — only if the user request involves CSS or visual customization.
 8. **Validate** — run the checklist below before writing any code.
 9. **Generate code** — write HTML, JS, and/or CSS using only what the MCP confirmed.
 
@@ -100,7 +100,7 @@ Reuse existing component instances when possible.
 
 ## Styling Rules
 
--   To style an Avonni component, you **must** call `get_component_styles` with `package: "dev"` for that component first.
+-   To style an Avonni component, you **must** call `get_component_styles` with `toolset: "dev"` for that component first.
 -   `get_component_styles` returns all CSS custom properties (styling hooks) the component exposes, along with their default values.
 -   Only use CSS variables returned by `get_component_styles` — do not invent variable names.
 -   Apply styling hooks in the component's CSS file using standard CSS custom property syntax:
