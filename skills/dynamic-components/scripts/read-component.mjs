@@ -52,7 +52,7 @@ function parseFieldValues(xml) {
  */
 function parseJsonArray(raw, fieldName) {
     try {
-        const parsed = JSON.parse(unescapeXml(raw ?? '[]'));
+        const parsed = JSON.parse(unescapeXml(raw || '[]'));
         if (!Array.isArray(parsed)) {
             throw new Error('expected a JSON array');
         }

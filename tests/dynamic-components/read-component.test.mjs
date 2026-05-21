@@ -31,7 +31,9 @@ function buildXml(fields) {
     const blocks = Object.entries(fields)
         .map(
             ([name, value]) =>
-                `    <values>\n        <field>${name}</field>\n        <value xsi:type="xsd:string">${escapeXml(value)}</value>\n    </values>`
+                `    <values>\n        <field>${name}</field>\n        <value xsi:type="xsd:string">${escapeXml(
+                    value
+                )}</value>\n    </values>`
         )
         .join('\n');
     return (
@@ -102,10 +104,10 @@ function runRaw(args = []) {
 }
 
 const MINIMAL_FIELDS = {
-    'avxp__DynamicComponentName__c': 'MyComponent',
-    'avxp__Value__c': '[]',
-    'avxp__Queries__c': '[]',
-    'avxp__Resources__c': '[]'
+    avxp__DynamicComponentName__c: 'MyComponent',
+    avxp__Value__c: '[]',
+    avxp__Queries__c: '[]',
+    avxp__Resources__c: '[]'
 };
 
 // ---------------------------------------------------------------------------
@@ -140,11 +142,9 @@ describe('Read Component XML', () => {
             try {
                 const xmlPath = join(dir, 'test.md-meta.xml');
                 writeFileSync(xmlPath, buildXml(MINIMAL_FIELDS));
-                const r = spawnSync(
-                    'node',
-                    [SCRIPT, xmlPath, '--unknown'],
-                    { encoding: 'utf8' }
-                );
+                const r = spawnSync('node', [SCRIPT, xmlPath, '--unknown'], {
+                    encoding: 'utf8'
+                });
                 assert.equal(r.status, 1);
                 assert.ok(r.stderr.includes('Unknown option: --unknown'));
             } finally {
@@ -178,7 +178,7 @@ describe('Read Component XML', () => {
         test('description extracted when present', () => {
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Description__c': 'A useful component'
+                avxp__Description__c: 'A useful component'
             });
             assert.equal(json.description, 'A useful component');
         });
@@ -192,16 +192,18 @@ describe('Read Component XML', () => {
             const value = [{ name: 'dcCard', apiName: 'dcCard1', value: {} }];
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Value__c': JSON.stringify(value)
+                avxp__Value__c: JSON.stringify(value)
             });
             assert.deepEqual(json.value, value);
         });
 
         test('queries array parsed from Queries__c', () => {
-            const queries = [{ apiName: 'getAccounts', objectApiName: 'Account' }];
+            const queries = [
+                { apiName: 'getAccounts', objectApiName: 'Account' }
+            ];
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Queries__c': JSON.stringify(queries)
+                avxp__Queries__c: JSON.stringify(queries)
             });
             assert.deepEqual(json.queries, queries);
         });
@@ -218,46 +220,50 @@ describe('Read Component XML', () => {
             ];
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Resources__c': JSON.stringify(resources)
+                avxp__Resources__c: JSON.stringify(resources)
             });
             assert.deepEqual(json.resources, resources);
         });
 
         test('missing DynamicComponentName__c is an error', () => {
-            const { 'avxp__DynamicComponentName__c': _, ...rest } = MINIMAL_FIELDS;
+            const { avxp__DynamicComponentName__c: _, ...rest } =
+                MINIMAL_FIELDS;
             fail(rest, 'Could not find avxp__DynamicComponentName__c');
         });
 
         test('missing Value__c defaults to empty array', () => {
-            const { 'avxp__Value__c': _, ...rest } = MINIMAL_FIELDS;
+            const { avxp__Value__c: _, ...rest } = MINIMAL_FIELDS;
             const { json } = pass(rest);
             assert.deepEqual(json.value, []);
         });
 
         test('missing Queries__c defaults to empty array', () => {
-            const { 'avxp__Queries__c': _, ...rest } = MINIMAL_FIELDS;
+            const { avxp__Queries__c: _, ...rest } = MINIMAL_FIELDS;
             const { json } = pass(rest);
             assert.deepEqual(json.queries, []);
         });
 
         test('missing Resources__c defaults to empty array', () => {
-            const { 'avxp__Resources__c': _, ...rest } = MINIMAL_FIELDS;
+            const { avxp__Resources__c: _, ...rest } = MINIMAL_FIELDS;
             const { json } = pass(rest);
             assert.deepEqual(json.resources, []);
         });
 
         test('empty Value__c field is treated as empty array', () => {
-            const { json } = pass({ ...MINIMAL_FIELDS, 'avxp__Value__c': '' });
+            const { json } = pass({ ...MINIMAL_FIELDS, avxp__Value__c: '' });
             assert.deepEqual(json.value, []);
         });
 
         test('empty Queries__c field is treated as empty array', () => {
-            const { json } = pass({ ...MINIMAL_FIELDS, 'avxp__Queries__c': '' });
+            const { json } = pass({ ...MINIMAL_FIELDS, avxp__Queries__c: '' });
             assert.deepEqual(json.queries, []);
         });
 
         test('empty Resources__c field is treated as empty array', () => {
-            const { json } = pass({ ...MINIMAL_FIELDS, 'avxp__Resources__c': '' });
+            const { json } = pass({
+                ...MINIMAL_FIELDS,
+                avxp__Resources__c: ''
+            });
             assert.deepEqual(json.resources, []);
         });
     });
@@ -270,7 +276,7 @@ describe('Read Component XML', () => {
         test('&quot; in description is unescaped to "', () => {
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Description__c': 'say "hello"'
+                avxp__Description__c: 'say "hello"'
             });
             assert.equal(json.description, 'say "hello"');
         });
@@ -278,7 +284,7 @@ describe('Read Component XML', () => {
         test('&lt; in description is unescaped to <', () => {
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Description__c': 'A < B'
+                avxp__Description__c: 'A < B'
             });
             assert.equal(json.description, 'A < B');
         });
@@ -286,7 +292,7 @@ describe('Read Component XML', () => {
         test('&gt; in description is unescaped to >', () => {
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Description__c': 'A > B'
+                avxp__Description__c: 'A > B'
             });
             assert.equal(json.description, 'A > B');
         });
@@ -294,16 +300,22 @@ describe('Read Component XML', () => {
         test('&amp; in description is unescaped to &', () => {
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Description__c': 'A & B'
+                avxp__Description__c: 'A & B'
             });
             assert.equal(json.description, 'A & B');
         });
 
         test('JSON with quoted strings in Value__c is correctly unescaped and parsed', () => {
-            const value = [{ name: 'dcCard', apiName: 'dcCard1', value: { label: 'Hello "World"' } }];
+            const value = [
+                {
+                    name: 'dcCard',
+                    apiName: 'dcCard1',
+                    value: { label: 'Hello "World"' }
+                }
+            ];
             const { json } = pass({
                 ...MINIMAL_FIELDS,
-                'avxp__Value__c': JSON.stringify(value)
+                avxp__Value__c: JSON.stringify(value)
             });
             assert.equal(json.value[0].value.label, 'Hello "World"');
         });
@@ -355,7 +367,9 @@ describe('Read Component XML', () => {
                     encoding: 'utf8'
                 });
                 assert.equal(r.status, 1);
-                assert.ok(r.stderr.includes('Failed to parse avxp__Queries__c'));
+                assert.ok(
+                    r.stderr.includes('Failed to parse avxp__Queries__c')
+                );
             } finally {
                 rmSync(dir, { recursive: true, force: true });
             }
@@ -450,8 +464,16 @@ describe('Read Component XML', () => {
         );
 
         test('output of read-component is valid input for validate-component', () => {
-            const value = [{ name: 'dcCard', apiName: 'dcCard1', value: { label: 'Hello' } }];
-            const queries = [{ apiName: 'getAccounts', objectApiName: 'Account' }];
+            const value = [
+                {
+                    name: 'dcCard',
+                    apiName: 'dcCard1',
+                    value: { label: 'Hello' }
+                }
+            ];
+            const queries = [
+                { apiName: 'getAccounts', objectApiName: 'Account' }
+            ];
             const resources = [
                 {
                     apiName: 'myConst',
@@ -463,9 +485,9 @@ describe('Read Component XML', () => {
             ];
             const fields = {
                 ...MINIMAL_FIELDS,
-                'avxp__Value__c': JSON.stringify(value),
-                'avxp__Queries__c': JSON.stringify(queries),
-                'avxp__Resources__c': JSON.stringify(resources)
+                avxp__Value__c: JSON.stringify(value),
+                avxp__Queries__c: JSON.stringify(queries),
+                avxp__Resources__c: JSON.stringify(resources)
             };
 
             const dir = mkdtempSync(join(tmpdir(), 'read-component-test-'));
