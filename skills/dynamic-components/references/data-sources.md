@@ -1,12 +1,14 @@
 # Data Sources
 
-A component's data source is controlled by `itemsTypeSelected`. Three modes exist: `"manual"`, `"query"`, and `"picklistValues"`. The correct binding properties differ per mode — never mix them.
+A component's data source is controlled by `itemsTypeSelected`. Three modes exist: `"static"`, `"query"`, and `"picklistValues"`. The correct binding properties differ per mode — never mix them.
+
+Before choosing a data source type, check which keys exist in the component's `dataSources` object. Only the types present there are available for that component. For example, if `dataSources` only contains a `query` key, the component cannot use static or picklist data sources.
 
 ---
 
 ## Static Data Source
 
-Use when items are statically defined. No query needed.
+Use when items are statically defined.
 
 A component's `dataSources.static` is an array — each entry is a named collection you must populate separately. Set each one directly in `value` using its `name` as the key.
 
@@ -41,7 +43,7 @@ Each entry's shape is defined by its own `properties` array in `dataSources.stat
 
 ## Picklist Data Source
 
-Use when items come from a Salesforce picklist field. No query needed.
+Use when items come from a Salesforce picklist field. A component can use a picklist data source when it has a `picklistValues` array set, even if this array is empty.
 
 ```json
 {
