@@ -4,7 +4,7 @@
  * avxp__AvonniDynamicComponent.<apiName>_<version>.md-meta.xml for deployment.
  *
  * Usage:
- *   node create-component.mjs <path-to.json | -> [--out-dir <directory>] [--version <number>]
+ *   node create-component.mjs <path-to.json | -> [--out-dir <directory>] [--version <number>] [--edit]
  *
  * Pass `-` (or omit the path) to read JSON from stdin.
  * If --version is omitted, defaults to 1.
@@ -13,17 +13,21 @@
  *
  * Fields managed by this script (always written with fresh values):
  *   DynamicComponentName__c, IsLastModified__c, LastModifiedDateTime__c,
- *   VersionNumber__c, Value__c, Queries__c, Resources__c,
+ *   LastModifiedByName__c, VersionNumber__c, Value__c, Queries__c, Resources__c,
  *   Description__c (when present), ObjectApiName__c (when present).
  *
  * Fields with defaults (taken from _passthrough when available, otherwise defaulted):
  *   CreatedDateTime__c → now, Status__c → "Inactive".
+ *   CreatedByName__c → current user (new/new-version) or preserved from _passthrough (--edit).
+ *
+ * Pass --edit when updating an existing version in place (preserves CreatedByName__c).
  *
  * All other fields in _passthrough are written verbatim, preserving their xsi:type.
  * This means any field added to the object in the future is automatically preserved
  * on update without any script changes.
  */
 
+import { execSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -120,10 +124,12 @@ const dbl = (localName, v) =>
 // to avoid duplicates.
 const MANAGED_FIELDS = new Set(
     [
+        'CreatedByName__c',
         'CreatedDateTime__c',
         'Description__c',
         'DynamicComponentName__c',
         'IsLastModified__c',
+        'LastModifiedByName__c',
         'LastModifiedDateTime__c',
         'ObjectApiName__c',
         'Queries__c',
@@ -135,11 +141,42 @@ const MANAGED_FIELDS = new Set(
 );
 
 /**
+ * Fetches the current Salesforce user's full name via the SF CLI.
+ * Returns null if any step fails (non-blocking).
+ * @returns {string | null}
+ */
+function fetchCurrentUserName() {
+    try {
+        const username = execSync(
+            "sf org display user --json | jq -r '.result.username'",
+            { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
+        ).trim();
+
+        if (!username || username === 'null') return null;
+
+        const queryJson = execSync(
+            `sf data query --query "SELECT FirstName, LastName FROM User WHERE Username = '${username}'" --json`,
+            { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
+        );
+
+        const record = JSON.parse(queryJson)?.result?.records?.[0];
+        if (!record) return null;
+
+        const fullName = `${record.FirstName ?? ''} ${record.LastName ?? ''}`.trim();
+        return fullName || null;
+    } catch {
+        return null;
+    }
+}
+
+/**
  * @param {unknown} data
  * @param {number} versionNumber
+ * @param {string | null} currentUserName
+ * @param {boolean} isEdit
  * @returns {string}
  */
-function buildCustomMetadataXml(data, versionNumber) {
+function buildCustomMetadataXml(data, versionNumber, currentUserName, isEdit) {
     const apiName = data.apiName;
     const queries = Array.isArray(data.queries) ? data.queries : [];
     const resources = Array.isArray(data.resources) ? data.resources : [];
@@ -165,6 +202,15 @@ function buildCustomMetadataXml(data, versionNumber) {
     // Status__c: preserve from passthrough or default to Inactive.
     const status = passthrough[addNamespace('Status__c')]?.value ?? 'Inactive';
 
+    // CreatedByName__c: preserve from passthrough when editing an existing version,
+    // otherwise use the current user (new component or new version).
+    const createdByName = isEdit
+        ? (passthrough[addNamespace('CreatedByName__c')]?.value ?? currentUserName)
+        : currentUserName;
+
+    // LastModifiedByName__c: always the current user.
+    const lastModifiedByName = currentUserName;
+
     const label = labelFromApiName(apiName);
 
     const parts = [
@@ -175,6 +221,10 @@ function buildCustomMetadataXml(data, versionNumber) {
         dt('CreatedDateTime__c', createdAt)
     ];
 
+    if (createdByName) {
+        parts.push(str('CreatedByName__c', escapeXmlString(createdByName)));
+    }
+
     if (description) {
         parts.push(str('Description__c', escapeXmlString(description)));
     }
@@ -184,6 +234,10 @@ function buildCustomMetadataXml(data, versionNumber) {
         bool('IsLastModified__c', true),
         dt('LastModifiedDateTime__c', now)
     );
+
+    if (lastModifiedByName) {
+        parts.push(str('LastModifiedByName__c', escapeXmlString(lastModifiedByName)));
+    }
 
     if (objectApiName) {
         parts.push(str('ObjectApiName__c', escapeXmlString(objectApiName)));
@@ -221,6 +275,8 @@ function parseArgs(argv) {
     let outDir;
     /** @type {number} */
     let versionNumber = 1;
+    /** @type {boolean} */
+    let isEdit = false;
 
     for (let i = 0; i < argv.length; i += 1) {
         const a = argv[i];
@@ -242,6 +298,8 @@ function parseArgs(argv) {
             }
             versionNumber = parsed;
             i += 1;
+        } else if (a === '--edit') {
+            isEdit = true;
         } else if (a === '-' || !a.startsWith('-')) {
             if (jsonPath) {
                 throw new Error(`Unexpected argument: ${a}`);
@@ -265,12 +323,13 @@ function parseArgs(argv) {
     return {
         jsonPath: useStdin ? null : resolve(jsonPath),
         outDir: resolve(outDir ?? defaultOut),
-        versionNumber
+        versionNumber,
+        isEdit
     };
 }
 
 function main() {
-    const { jsonPath, outDir, versionNumber } = parseArgs(
+    const { jsonPath, outDir, versionNumber, isEdit } = parseArgs(
         process.argv.slice(2)
     );
 
@@ -305,7 +364,14 @@ function main() {
     }
     process.stderr.write('Validation passed.\n');
 
-    const xml = buildCustomMetadataXml(data, versionNumber);
+    const currentUserName = fetchCurrentUserName();
+    if (!currentUserName) {
+        process.stderr.write(
+            'Warning: could not retrieve current Salesforce user name. CreatedByName__c / LastModifiedByName__c will be omitted.\n'
+        );
+    }
+
+    const xml = buildCustomMetadataXml(data, versionNumber, currentUserName, isEdit);
     const apiName = data.apiName;
     const fileName = `${addNamespace(
         'AvonniDynamicComponent'
