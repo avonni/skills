@@ -42,13 +42,14 @@ Before saving, check whether you are on the **Update Path** (i.e., you read an e
 Pipe the component JSON (generated in the previous skill step) into the save script. Do not write the JSON to a file first. The save script runs validation internally before writing the file.
 
 ```bash
-node <skill_base_directory>/scripts/create-component.mjs - --version <version> <<'EOF'
+node <skill_base_directory>/scripts/create-component.mjs - --version <version> [--edit] <<'EOF'
 <component JSON here, with "_passthrough" included if on the Update Path>
 EOF
 ```
 
 -   Use `<<'EOF'` (quoted) so the shell does not interpolate `$` or backticks inside the JSON.
 -   Replace `<version>` with the version number determined in Step 2.
+-   Pass `--edit` **only** when the user chose option 2 (updating the current version in place). Do not pass it for new versions or new components.
 -   On the **Create Path** (brand-new component), omit `_passthrough` entirely.
 -   The save script auto-generates all `id` fields (UUID v4) and validates the structure. If validation fails, it exits with a non-zero code and prints errors to stderr — the file will not be written.
 
