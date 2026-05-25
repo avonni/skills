@@ -51,6 +51,15 @@ The object API name will be included in the plan and passed through to the build
     -   Pass the component name as a single `name` string input.
     -   Never batch multiple components into one call.
 
+## Identify the correct data source type
+
+Valid only for components that include a `dataSources` object in their documentation.
+Before planning the data source, determine which type fits the request:
+
+1. **Picklist data source** — use when the user wants to display the possible options/values of a Salesforce picklist field (e.g. "show the Industry options", "list the Stage values"). A component supports this mode if it has `picklistValues` key (it may be an empty array — that is still valid).
+2. **Query data source** — use when items come from live Salesforce records.
+3. **Static data source** — use only when items are fixed, hardcoded values unrelated to any Salesforce object or field.
+
 ## Identify what objects are used in the plan
 
 -   If components display records through a query, you need to identify which object(s) they use and what their fields are.
