@@ -156,7 +156,14 @@ Resources are reusable references to a value.
 All resources must be in top-level `"resources": []`. If none: `"resources": []`.
 Allowed types are `constant`, `formula`, and `variable`.
 
-#### Constant structure
+#### Common Fields for Every Types
+
+-   `apiName`, `description`, `dataType` and `type` are always required.
+-   `apiName`: serves as the resource title and unique identifier. It should follow the API Name Rules below, be short and descriptive.
+-   `type`: `constant`, `formula` or `variable`.
+-   Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
+
+#### Constant Structure
 
 ```json
 {
@@ -168,8 +175,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   Required fields: `apiName`, `description`, `dataType`, `defaultValue`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
--   `type` is always equal to "constant".
+`defaultValue` is required for constant resources.
 
 #### Variable structure
 
@@ -185,9 +191,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   Required fields: `apiName`, `description`, `dataType`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
--   It is mandatory that `type` is "variable".
--   If the variable needs to be accessed outside of the Dynamic Component, availability should be set. Its value is an array of strings: `["input"] | ["output"] | ["input","output"]`.
+If the variable needs to be accessed outside of the Dynamic Component, availability should be set. Its value is an array of strings: `["input"] | ["output"] | ["input","output"]`.
 
 #### Formula structure
 
@@ -201,9 +205,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   Required fields: `apiName`, `description`, `dataType`, `formula`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
--   It is mandatory that `type` is "formula".
--   Formula syntax = Salesforce formula functions (`TODAY()`, `ABS()`, `IF()`, etc.)
+`formula` is required for formula resources. Formula syntax = Salesforce formula functions (`TODAY()`, `ABS()`, `IF()`, etc.).
 
 ### Global references
 
