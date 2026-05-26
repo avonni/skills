@@ -57,8 +57,9 @@ Valid only for components that include a `dataSources` object in their documenta
 Before planning the data source, determine which type fits the request:
 
 1. **Picklist data source** — use when the user wants to display the possible options/values of a Salesforce picklist field (e.g. "show the Industry options", "list the Stage values"). A component supports this mode if it has `picklistValues` key (it may be an empty array — that is still valid).
-2. **Query data source** — use when items come from live Salesforce records.
-3. **Static data source** — use only when items are fixed, hardcoded values unrelated to any Salesforce object or field.
+2. **Variable data source** — use when items come from another component's output (e.g. the selected records of another component).
+3. **Query data source** — use when items come from live Salesforce records.
+4. **Static data source** — use only when items are fixed, hardcoded values unrelated to any Salesforce object or field.
 
 ## Identify what objects are used in the plan
 

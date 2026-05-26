@@ -126,10 +126,10 @@ When processing a component, always check its definition for an additional instr
 ## Data Display Components: `dataSources`
 
 -   If a component definition contains `dataSources`, it is a data display component.
--   Three data source types exist: `manual`, `query`, and `picklistValues`. Never generate other types.
+-   Three data source types exist: `static`, `query`, `variables` and `picklistValues`. Never generate other types.
 -   A component **cannot** use more than one data source type at the same time.
 -   It is mandatory you read and follow `data-sources.md` to set the correct binding properties for whichever type is needed.
--   **Special case:** If you are using a `dcTree` and/or a `dcRelationshipGraph` component, it is mandatory you also read and follow `nested-data-sources.md`.
+-   **Special case:** If you are using a `dcTree` and/or a `dcRelationshipGraph` component, it is mandatory you also read `nested-data-sources.md`. Its rules replace the **Query Binding** and **Picklist Data Source** sections of `data-sources.md` for those components. The Query Definition structure (filters, `filterVariables`, `filterVariablesTypes`, etc.) still applies.
 
 ## References
 

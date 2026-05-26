@@ -1,8 +1,8 @@
 # Data Sources
 
-A component's data source is controlled by `itemsTypeSelected`. Three modes exist: `"static"`, `"query"`, and `"picklistValues"`. The correct binding properties differ per mode — never mix them.
+A component's data source is controlled by `itemsTypeSelected`. Four modes exist: `"static"`, `"query"`, `"variables"`, and `"picklistValues"`. The correct binding properties differ per mode — never mix them.
 
-Before choosing a data source type, check which keys exist in the component's `dataSources` object. Only the types present there are available for that component. For example, if `dataSources` only contains a `query` key, the component cannot use static or picklist data sources.
+Before choosing a data source type, check which keys exist in the component's `dataSources` object. Only the types present there are available for that component. For example, if `dataSources` only contains a `query` key, the component cannot use static, variable or picklist data sources.
 
 ---
 
@@ -41,9 +41,40 @@ Each entry's shape is defined by its own `properties` array in `dataSources.stat
 
 ---
 
+## Variable Data Source
+
+Use when items come from another component's output — for example, when a component displays the selected records of a Datatable.
+
+**Example:**
+
+```json
+{
+    "itemsTypeSelected": "variables",
+    "itemsSObject": "{!Datatable1.selectedRowsSObject}",
+    "itemsSObjectApiName": "{!Datatable1.itemsSObjectApiName}",
+    "itemsSObjectMapping": {
+        "label": "{{Record.Name}}",
+        "name": "{{Record.Id}}"
+    }
+}
+```
+
+| Property              | Required | Description                                                                                                                                                                               |
+| --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `itemsTypeSelected`   | yes      | Must be `"variables"`                                                                                                                                                                     |
+| `itemsSObject`        | yes      | Reference to the source component's records output property (`{!<componentApiName>.<propertyName>}`)                                                                                      |
+| `itemsSObjectApiName` | yes      | Reference to the source component's `itemsSObjectApiName` property (`{!<componentApiName>.itemsSObjectApiName}`)                                                                          |
+| `itemsSObjectMapping` | yes      | Maps each component item key to its value. Each key accepts a static value (`"standard:account"`), a record field (`"{{Record.Name}}"`), or a mix (`"Located in {{Record.BillingCity}}"`) |
+
+Some components expose additional properties under `dataSources.variables`. Set each one as a reference to an output property, similarly to `itemsSObject`.
+
+---
+
 ## Picklist Data Source
 
 Use when items come from a Salesforce picklist field. A component can use a picklist data source when it has a `picklistValues` array set, even if this array is empty.
+
+**Example:**
 
 ```json
 {
@@ -134,13 +165,29 @@ Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Nu
 
 ### Query Binding
 
-When using `"itemsTypeSelected": "query"`, set inside `value`:
+Use when items come from a query result.
 
--   `"itemsTypeSelected": "query"`
--   `"itemsSObject": "{!$Query.<apiName>}"`
--   `"itemsSObjectApiName": "<ObjectApiName>"` — must always equal the `objectApiName` of the referenced query
--   `"nbItems": "{!$Query.<apiName>.nbItems}"`
--   `"itemsSObjectMapping": { ... }` — maps each component item key to its value. Each key can be set to:
-    -   A static value: `"iconName": "standard:account"`
-    -   A record field: `"label": "{{Record.Name}}"`
-    -   A mix of both: `"description": "They live in {{Record.BillingCity}}"`
+**Example:**
+
+```json
+{
+    "itemsTypeSelected": "query",
+    "itemsSObject": "{!$Query.getAccounts}",
+    "itemsSObjectApiName": "Account",
+    "nbItems": "{!$Query.getAccounts.nbItems}",
+    "itemsSObjectMapping": {
+        "label": "{{Record.Name}}",
+        "name": "{{Record.Id}}",
+        "description": "Located in {{Record.BillingCity}}",
+        "iconName": "standard:account"
+    }
+}
+```
+
+| Property              | Required | Description                                                                                                                                                                               |
+| --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `itemsTypeSelected`   | yes      | Must be `"query"`                                                                                                                                                                         |
+| `itemsSObject`        | yes      | `"{!$Query.<apiName>}"` — reference to the query                                                                                                                                          |
+| `itemsSObjectApiName` | yes      | Must equal the `objectApiName` of the referenced query                                                                                                                                    |
+| `nbItems`             | yes      | `"{!$Query.<apiName>.nbItems}"` — the query result count                                                                                                                                  |
+| `itemsSObjectMapping` | yes      | Maps each component item key to its value. Each key accepts a static value (`"standard:account"`), a record field (`"{{Record.Name}}"`), or a mix (`"Located in {{Record.BillingCity}}"`) |
