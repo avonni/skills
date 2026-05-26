@@ -68,14 +68,14 @@ Required for every component wrapper. Must be unique across the entire value tre
 
 #### Default naming pattern
 
-component name + incremental integer starting at 1.
-Examples: `dcCard1`, `dcCard2`, `dcAlert1`
+component name without "dc" prefix + incremental integer starting at 1.
+Examples: `Card1`, `Card2`, `Alert1`
 
 #### Increment rules
 
--   The counter is per component type, not global. `dcCard1` and `dcAlert1` can coexist.
+-   The counter is per component type, not global. `Card1` and `Alert1` can coexist.
 -   Traverse the tree depth-first and assign numbers in the order components are encountered.
--   If the same component type appears in different slots or branches, continue the counter — never reset it. For example, two `dcCard` in a container and one `dcCard` in a sibling tab would be `dcCard1`, `dcCard2`, `dcCard3`.
+-   If the same component type appears in different slots or branches, continue the counter — never reset it. For example, two `dcCard` in a container and one `dcCard` in a sibling tab would be `Card1`, `Card2`, `Card3`.
 
 #### Conflict resolution
 
@@ -143,8 +143,8 @@ References are pointers to other elements that you can use as values. They follo
 ### Component property reference
 
 A component can reference the value of another component's property using the pattern `{!componentApiName.componentProperty}`.
-For example, `{!dcHeader1.title}` is a reference to the value of the `title` property of the `dcHeader1` component.
-If a property has an object as a value, it is possible to reference the value of one of its keys. For example, `{!dcDatatable1.firstSelectedRowSObject.Name}` is a reference to the `Name` key of the `firstSelectedRowSObject` object value, of the `dcDatatable1` component.
+For example, `{!Header1.title}` is a reference to the value of the `title` property of the `Header1` component.
+If a property has an object as a value, it is possible to reference the value of one of its keys. For example, `{!Datatable1.firstSelectedRowSObject.Name}` is a reference to the `Name` key of the `firstSelectedRowSObject` object value, of the `Datatable1` component.
 
 ### Query
 

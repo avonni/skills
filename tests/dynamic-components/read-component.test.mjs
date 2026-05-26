@@ -202,7 +202,7 @@ describe('Read Component XML', () => {
         });
 
         test('value array parsed from Value__c', () => {
-            const value = [{ name: 'dcCard', apiName: 'dcCard1', value: {} }];
+            const value = [{ name: 'dcCard', apiName: 'Card1', value: {} }];
             const { json } = pass({
                 ...MINIMAL_FIELDS,
                 avxp__Value__c: JSON.stringify(value)
@@ -322,7 +322,7 @@ describe('Read Component XML', () => {
             const value = [
                 {
                     name: 'dcCard',
-                    apiName: 'dcCard1',
+                    apiName: 'Card1',
                     value: { label: 'Hello "World"' }
                 }
             ];
@@ -479,7 +479,7 @@ describe('Read Component XML', () => {
             const value = [
                 {
                     name: 'dcCard',
-                    apiName: 'dcCard1',
+                    apiName: 'Card1',
                     value: { label: 'Hello' }
                 }
             ];

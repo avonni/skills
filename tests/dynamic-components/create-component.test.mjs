@@ -390,11 +390,11 @@ describe('Create Component XML', () => {
         test('Value__c contains JSON-stringified value', () => {
             const input = {
                 ...MINIMAL,
-                value: [{ name: 'dcCard', apiName: 'dcCard1', value: {} }]
+                value: [{ name: 'dcCard', apiName: 'Card1', value: {} }]
             };
             const { xml } = pass(input);
             assert.ok(xml.includes('<field>avxp__Value__c</field>'));
-            assert.ok(xml.includes('dcCard1'));
+            assert.ok(xml.includes('Card1'));
         });
 
         test('empty arrays produce [] in Queries__c, Resources__c, Value__c', () => {
@@ -469,7 +469,7 @@ describe('Create Component XML', () => {
                 value: [
                     {
                         name: 'dcCard',
-                        apiName: 'dcCard1',
+                        apiName: 'Card1',
                         value: { label: 'A & <B>' }
                     }
                 ]
