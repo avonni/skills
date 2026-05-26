@@ -66,18 +66,18 @@ Required. Must be the exact name of the component, as written in its metadata.
 
 Required for every component wrapper. Must be unique across the entire value tree, including all nested slot components.
 
-#### Default naming pattern
+#### Default Naming Pattern
 
 component name without "dc" prefix + incremental integer starting at 1.
 Examples: `Card1`, `Card2`, `Alert1`
 
-#### Increment rules
+#### Increment Rules
 
 -   The counter is per component type, not global. `Card1` and `Alert1` can coexist.
 -   Traverse the tree depth-first and assign numbers in the order components are encountered.
 -   If the same component type appears in different slots or branches, continue the counter — never reset it. For example, two `dcCard` in a container and one `dcCard` in a sibling tab would be `Card1`, `Card2`, `Card3`.
 
-#### Conflict resolution
+#### Conflict Resolution
 
 -   Before finalizing output, verify no two components share the same `apiName`. If a conflict is detected, increment the suffix of the later component until the value is unique.
 -   Never reuse an `apiName` even if a component is in a different branch of the tree.
@@ -97,7 +97,7 @@ For any property of type `icon`:
 -   Use only valid Salesforce Lightning Design System icons, in the format `category:icon-name` (for example `standard:account`).
 -   Never invent icons.
 
-#### Conditional properties
+#### Conditional Properties
 
 Some properties can be used only if a condition is met (`"when": { condition }`). You can use them only if the component value matches the condition.
 For example:
@@ -140,7 +140,7 @@ References are pointers to other elements that you can use as values. They follo
 -   Resource: `{!<resourceApiName>}` (e.g. `{!constant1}`).
 -   Global references: `{!$<category>.<referenceName>}` (e.g. `{!$Organization.City}`).
 
-### Component property reference
+### Component Property Reference
 
 A component can reference the value of another component's property using the pattern `{!componentApiName.componentProperty}`.
 For example, `{!Header1.title}` is a reference to the value of the `title` property of the `Header1` component.
@@ -177,7 +177,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 
 `defaultValue` is required for constant resources.
 
-#### Variable structure
+#### Variable Structure
 
 ```json
 {
@@ -193,7 +193,7 @@ Allowed types are `constant`, `formula`, and `variable`.
 
 If the variable needs to be accessed outside of the Dynamic Component, availability should be set. Its value is an array of strings: `["input"] | ["output"] | ["input","output"]`.
 
-#### Formula structure
+#### Formula Structure
 
 ```json
 {
@@ -207,7 +207,7 @@ If the variable needs to be accessed outside of the Dynamic Component, availabil
 
 `formula` is required for formula resources. Formula syntax = Salesforce formula functions (`TODAY()`, `ABS()`, `IF()`, etc.).
 
-### Global references
+### Global References
 
 Reference to a variable related to the user, the Salesforce org, the dynamic component settings, etc. Pattern: `{!$<Category>.<referenceName>}`.
 
@@ -291,7 +291,7 @@ Only `{!$System.OriginDateTime}` is available (type: `datetime`).
 -   CSS declarations separated by `;`
 -   Good practice: add spacing between sibling components so they are never visually flush against each other.
 
-### Token preference (mandatory):
+### Token Preference (Mandatory):
 
 Always prefer LWC tokens over raw values. Raw values (e.g., `"16px"`) are only acceptable when a token does not match the required style.
 Use the fallback value that corresponds to the token's intended value so the style degrades gracefully if the token is unavailable.
@@ -299,7 +299,7 @@ Use the fallback value that corresponds to the token's intended value so the sty
 -   Correct: `var(--lwc-spacingMedium, 1rem)`
 -   Avoid: `16px`
 
-**Spacing tokens:**
+**Spacing Tokens:**
 `--lwc-spacingNone` · `--lwc-spacingXxxSmall` · `--lwc-spacingXxSmall` · `--lwc-spacingXSmall` · `--lwc-spacingSmall` · `--lwc-spacingMedium` · `--lwc-spacingLarge` · `--lwc-spacingXLarge` · `--lwc-spacingXxLarge`
 
 ## Interactions

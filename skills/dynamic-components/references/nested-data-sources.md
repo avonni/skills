@@ -12,7 +12,7 @@ Set inside `value`:
 -   `"itemsSObjectApiName": "<ObjectApiName>"` — the Salesforce object the picklist fields belong to
 -   `"picklistItems": [ ... ]` — array of picklist field nodes, ordered from controlling field (root) to deepest dependent field
 
-### `picklistItems` structure
+### `picklistItems` Structure
 
 Each entry in `picklistItems` represents one level of the controlling/dependent chain. The structure is recursive: a node can contain `items` with the same shape, allowing chains of multiple dependency levels.
 

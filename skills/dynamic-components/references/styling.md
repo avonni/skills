@@ -23,7 +23,7 @@ If `get_component_styles` fails:
 -   Retry once.
 -   If it still fails, inform the user and ask whether to continue without component styling.
 
-## Format of styling hook names
+## Format of Styling Hook Names
 
 Styling hooks are CSS variables that you use to update specific properties in a component's styling.
 By convention, styling hooks `name` follow this format: `namespace-component-property-modifier`
@@ -53,6 +53,6 @@ Before producing final code, verify:
 
 If any check fails, fix it before output.
 
-### Unknown or Ambiguous request
+### Unknown or Ambiguous Request
 
 -   Never generate a CSS property or a styling hook that is not explicitly defined in the documentation, even if the name seems plausible or close to an existing one.

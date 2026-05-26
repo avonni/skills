@@ -1,6 +1,6 @@
-# Visibility rules
+# Visibility Rules
 
-## Simple condition
+## Simple Condition
 
 ```json
 "visibilityRule": {
@@ -12,7 +12,7 @@
 }
 ```
 
-## Compound condition
+## Compound Condition
 
 ```json
 "visibilityRule": {
@@ -27,7 +27,7 @@
 -   Value type should be adapted to the field type (string, boolean, etc.).
 -   Value can be a primitive or a reference.
 
-## Allowed operators
+## Allowed Operators
 
 Equality:
 

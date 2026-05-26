@@ -15,7 +15,7 @@ From the results:
 -   Find the highest `avxp__VersionNumber__c` value. The new version number is that value + 1 as a whole number (e.g. if the max is `2.0`, the next version is `3`).
 -   Save the `DeveloperName` of the record where `avxp__IsLastModified__c` is `true`, if any exists.
 
-### Error handling
+### Error Handling
 
 -   If the query fails, retry once.
 -   If it still fails, inform the user and ask whether to continue. If continuing, use version `1` and skip Step 3.
@@ -53,7 +53,7 @@ EOF
 -   On the **Create Path** (brand-new component), omit `_passthrough` entirely.
 -   The save script auto-generates all `id` fields (UUID v4) and validates the structure. If validation fails, it exits with a non-zero code and prints errors to stderr — the file will not be written.
 
-### Handling validation errors
+### Handling Validation Errors
 
 If the save script exits with validation errors:
 
@@ -71,7 +71,7 @@ node <skill_base_directory>/scripts/remove-last-modified-flag.mjs <DeveloperName
 
 Replace `<DeveloperName>` with the saved value. The script finds the file locally under `./force-app`, retrieves it from Salesforce automatically if it is missing, and sets `avxp__IsLastModified__c` to false.
 
-### Error handling
+### Error Handling
 
 -   If the script fails, inform the user of the error message and the file that was expected.
 -   Never skip this step silently.
