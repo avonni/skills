@@ -4,7 +4,7 @@ description: Create or update Avonni Dynamic Components. Use when the user asks 
 license: MIT
 compatibility: Requires Node.js >=18, the Avonni MCP server (dynamic toolset), and Salesforce CLI.
 metadata:
-    version: '1.0'
+    version: '1.0.0'
 ---
 
 # avonni-dynamic-components

@@ -12,6 +12,9 @@
 import { execSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { detectNamespace } from './namespace.mjs';
+
+const NAMESPACE = detectNamespace();
 
 /**
  * Recursively searches dir for a file named
@@ -21,7 +24,7 @@ import { join, resolve } from 'node:path';
  * @returns {string | null}
  */
 function findFile(dir, developerName) {
-    const target = `avxp__AvonniDynamicComponent.${developerName}.md-meta.xml`;
+    const target = `${NAMESPACE}__AvonniDynamicComponent.${developerName}.md-meta.xml`;
 
     function walk(current) {
         let entries;
@@ -51,14 +54,17 @@ function findFile(dir, developerName) {
  * @param {string} filePath
  */
 function deactivate(filePath) {
+    const fieldName = `${NAMESPACE}__IsLastModified__c`;
     const content = readFileSync(filePath, 'utf8');
     const updated = content.replace(
-        /(<field>avxp__IsLastModified__c<\/field>[\s\S]*?<value[^>]*>)true(<\/value>)/,
+        new RegExp(
+            `(<field>${fieldName}<\\/field>[\\s\\S]*?<value[^>]*>)true(<\\/value>)`
+        ),
         '$1false$2'
     );
     if (updated === content) {
         throw new Error(
-            `avxp__IsLastModified__c not found or already false in ${filePath}`
+            `${fieldName} not found or already false in ${filePath}`
         );
     }
     writeFileSync(filePath, updated, 'utf8');
@@ -108,7 +114,7 @@ function main() {
         );
         try {
             execSync(
-                `sf project retrieve start --metadata "CustomMetadata:avxp__AvonniDynamicComponent.${developerName}"`,
+                `sf project retrieve start --metadata "CustomMetadata:${NAMESPACE}__AvonniDynamicComponent.${developerName}"`,
                 { stdio: 'inherit' }
             );
         } catch (e) {
@@ -123,13 +129,13 @@ function main() {
 
     if (!filePath) {
         throw new Error(
-            `avxp__AvonniDynamicComponent.${developerName}.md-meta.xml not found under ${searchDir} after retrieval attempt.`
+            `${NAMESPACE}__AvonniDynamicComponent.${developerName}.md-meta.xml not found under ${searchDir} after retrieval attempt.`
         );
     }
 
     deactivate(filePath);
     process.stderr.write(
-        `Updated ${filePath}: avxp__IsLastModified__c set to false\n`
+        `Updated ${filePath}: ${NAMESPACE}__IsLastModified__c set to false\n`
     );
 }
 

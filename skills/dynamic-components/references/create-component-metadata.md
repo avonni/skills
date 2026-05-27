@@ -4,22 +4,33 @@ Your goal is to save a Dynamic Component as a metadata file. Depending on the us
 
 ## Step 1 — Query Existing Versions
 
-Run the following Salesforce query, replacing `<apiName>` with the component's `apiName`:
+Run the following script, replacing `<apiName>` with the component's `apiName`:
 
 ```bash
-sf data query --query "SELECT DeveloperName, avxp__VersionNumber__c, avxp__IsLastModified__c FROM avxp__AvonniDynamicComponent__mdt WHERE avxp__DynamicComponentName__c = '<apiName>'"
+node <skill_base_directory>/scripts/query-versions.mjs --api-name <apiName>
 ```
 
-From the results:
+The script outputs a JSON object:
 
--   Find the highest `avxp__VersionNumber__c` value. The new version number is that value + 1 as a whole number (e.g. if the max is `2.0`, the next version is `3`).
--   Save the `DeveloperName` of the record where `avxp__IsLastModified__c` is `true`, if any exists.
+```json
+{
+    "nextVersion": 3,
+    "currentVersion": 2,
+    "lastModifiedDeveloperName": "MyComponent_2"
+}
+```
+
+From the result:
+
+-   Use `nextVersion` as the candidate new version number.
+-   Use `currentVersion` as the candidate overwrite version number (may be `null`).
+-   Save `lastModifiedDeveloperName` for use in Step 4 (may be `null`).
 
 ### Error Handling
 
--   If the query fails, retry once.
--   If it still fails, inform the user and ask whether to continue. If continuing, use version `1` and skip Step 3.
--   If no records are returned, use version `1` and skip Step 3.
+-   If the script fails, retry once.
+-   If it still fails, inform the user and ask whether to continue. If continuing, use version `1` and skip Steps 2 and 4.
+-   If `nextVersion` is `1` and `currentVersion` is `null`, this is a first-time save — skip Step 2.
 
 ## Step 2 — Choose Versioning Strategy
 
@@ -42,7 +53,7 @@ Before saving, check whether you are on the **Update Path** (i.e., you read an e
 Pipe the component JSON (generated in the previous skill step) into the save script. Do not write the JSON to a file first. The save script runs validation internally before writing the file.
 
 ```bash
-node <skill_base_directory>/scripts/create-component.mjs - --version <version> [--edit] <<'EOF'
+node <skill_base_directory>/scripts/create-component.mjs - --version <version> [--edit] [--prev-developer-name <lastModifiedDeveloperName>] <<'EOF'
 <component JSON here, with "_passthrough" included if on the Update Path>
 EOF
 ```
@@ -50,8 +61,9 @@ EOF
 -   Use `<<'EOF'` (quoted) so the shell does not interpolate `$` or backticks inside the JSON.
 -   Replace `<version>` with the version number determined in Step 2.
 -   Pass `--edit` **only** when the user chose option 2 (updating the current version in place). Do not pass it for new versions or new components.
+-   Pass `--prev-developer-name` with the `lastModifiedDeveloperName` from Step 1 **only** when creating a new version (user chose option 1) and `lastModifiedDeveloperName` is not `null`. Do not pass it on `--edit` or on a first-time save.
 -   On the **Create Path** (brand-new component), omit `_passthrough` entirely.
--   The save script auto-generates all `id` fields (UUID v4) and validates the structure. If validation fails, it exits with a non-zero code and prints errors to stderr — the file will not be written.
+-   The save script auto-generates all `id` fields (UUID v4), validates the structure, and automatically clears the `IsLastModified__c` flag on the previous version when `--prev-developer-name` is provided. If validation fails, it exits with a non-zero code and prints errors to stderr — the file will not be written.
 
 ### Handling Validation Errors
 
