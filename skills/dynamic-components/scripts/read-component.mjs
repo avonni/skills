@@ -13,8 +13,9 @@
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { detectNamespace } from './namespace.mjs';
 
-const NAMESPACE = 'avxp';
+const NAMESPACE = detectNamespace();
 
 /**
  * @param {string} localName field name without namespace prefix

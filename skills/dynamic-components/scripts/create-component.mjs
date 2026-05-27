@@ -4,7 +4,7 @@
  * avxp__AvonniDynamicComponent.<apiName>_<version>.md-meta.xml for deployment.
  *
  * Usage:
- *   node create-component.mjs <path-to.json | -> [--out-dir <directory>] [--version <number>] [--edit]
+ *   node create-component.mjs <path-to.json | -> [--out-dir <directory>] [--version <number>] [--edit] [--prev-developer-name <name>]
  *
  * Pass `-` (or omit the path) to read JSON from stdin.
  * If --version is omitted, defaults to 1.
@@ -28,9 +28,10 @@
  */
 
 import { execSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { detectNamespace } from './namespace.mjs';
 import { validateComponent } from './validate-component.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -38,7 +39,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const CUSTOM_METADATA_NS = 'http://soap.sforce.com/2006/04/metadata';
 const XSI_NS = 'http://www.w3.org/2001/XMLSchema-instance';
 const XSD_NS = 'http://www.w3.org/2001/XMLSchema';
-const NAMESPACE = 'avxp';
+const NAMESPACE = detectNamespace();
 
 /**
  * @param {string} s
@@ -162,7 +163,9 @@ function fetchCurrentUserName() {
         const record = JSON.parse(queryJson)?.result?.records?.[0];
         if (!record) return null;
 
-        const fullName = `${record.FirstName ?? ''} ${record.LastName ?? ''}`.trim();
+        const fullName = `${record.FirstName ?? ''} ${
+            record.LastName ?? ''
+        }`.trim();
         return fullName || null;
     } catch {
         return null;
@@ -205,7 +208,8 @@ function buildCustomMetadataXml(data, versionNumber, currentUserName, isEdit) {
     // CreatedByName__c: preserve from passthrough when editing an existing version,
     // otherwise use the current user (new component or new version).
     const createdByName = isEdit
-        ? (passthrough[addNamespace('CreatedByName__c')]?.value ?? currentUserName)
+        ? passthrough[addNamespace('CreatedByName__c')]?.value ??
+          currentUserName
         : currentUserName;
 
     // LastModifiedByName__c: always the current user.
@@ -236,7 +240,9 @@ function buildCustomMetadataXml(data, versionNumber, currentUserName, isEdit) {
     );
 
     if (lastModifiedByName) {
-        parts.push(str('LastModifiedByName__c', escapeXmlString(lastModifiedByName)));
+        parts.push(
+            str('LastModifiedByName__c', escapeXmlString(lastModifiedByName))
+        );
     }
 
     if (objectApiName) {
@@ -268,6 +274,77 @@ function buildCustomMetadataXml(data, versionNumber, currentUserName, isEdit) {
     return parts.join('\n');
 }
 
+/**
+ * Recursively searches dir for the metadata file of the given DeveloperName.
+ * @param {string} dir
+ * @param {string} developerName
+ * @returns {string | null}
+ */
+function findPrevFile(dir, developerName) {
+    const target = `${NAMESPACE}__AvonniDynamicComponent.${developerName}.md-meta.xml`;
+    function walk(current) {
+        let entries;
+        try {
+            entries = readdirSync(current, { withFileTypes: true });
+        } catch {
+            return null;
+        }
+        for (const ent of entries) {
+            const p = join(current, ent.name);
+            if (ent.isDirectory()) {
+                const found = walk(p);
+                if (found) return found;
+            } else if (ent.name === target) {
+                return p;
+            }
+        }
+        return null;
+    }
+    return walk(resolve(dir));
+}
+
+/**
+ * Clears IsLastModified__c on the previous version's metadata file.
+ * Retrieves the file from Salesforce if not found locally.
+ * @param {string} developerName
+ */
+function clearPrevLastModified(developerName) {
+    let filePath = findPrevFile('./force-app', developerName);
+
+    if (!filePath) {
+        process.stderr.write(`Previous version file not found locally. Retrieving from Salesforce...\n`);
+        try {
+            execSync(
+                `sf project retrieve start --metadata "CustomMetadata:${NAMESPACE}__AvonniDynamicComponent.${developerName}"`,
+                { stdio: 'inherit' }
+            );
+        } catch (e) {
+            throw new Error(
+                `Salesforce retrieval failed: ${e instanceof Error ? e.message : String(e)}`
+            );
+        }
+        filePath = findPrevFile('./force-app', developerName);
+    }
+
+    if (!filePath) {
+        throw new Error(
+            `${NAMESPACE}__AvonniDynamicComponent.${developerName}.md-meta.xml not found under ./force-app after retrieval attempt.`
+        );
+    }
+
+    const fieldName = `${NAMESPACE}__IsLastModified__c`;
+    const content = readFileSync(filePath, 'utf8');
+    const updated = content.replace(
+        new RegExp(`(<field>${fieldName}<\\/field>[\\s\\S]*?<value[^>]*>)true(<\\/value>)`),
+        '$1false$2'
+    );
+    if (updated === content) {
+        throw new Error(`${fieldName} not found or already false in ${filePath}`);
+    }
+    writeFileSync(filePath, updated, 'utf8');
+    process.stderr.write(`Updated ${filePath}: ${fieldName} set to false\n`);
+}
+
 function parseArgs(argv) {
     /** @type {string | undefined} */
     let jsonPath;
@@ -277,6 +354,8 @@ function parseArgs(argv) {
     let versionNumber = 1;
     /** @type {boolean} */
     let isEdit = false;
+    /** @type {string | undefined} */
+    let prevDeveloperName;
 
     for (let i = 0; i < argv.length; i += 1) {
         const a = argv[i];
@@ -300,6 +379,13 @@ function parseArgs(argv) {
             i += 1;
         } else if (a === '--edit') {
             isEdit = true;
+        } else if (a === '--prev-developer-name') {
+            const next = argv[i + 1];
+            if (!next || next.startsWith('-')) {
+                throw new Error('--prev-developer-name requires a value');
+            }
+            prevDeveloperName = next;
+            i += 1;
         } else if (a === '-' || !a.startsWith('-')) {
             if (jsonPath) {
                 throw new Error(`Unexpected argument: ${a}`);
@@ -324,12 +410,13 @@ function parseArgs(argv) {
         jsonPath: useStdin ? null : resolve(jsonPath),
         outDir: resolve(outDir ?? defaultOut),
         versionNumber,
-        isEdit
+        isEdit,
+        prevDeveloperName
     };
 }
 
 function main() {
-    const { jsonPath, outDir, versionNumber, isEdit } = parseArgs(
+    const { jsonPath, outDir, versionNumber, isEdit, prevDeveloperName } = parseArgs(
         process.argv.slice(2)
     );
 
@@ -371,7 +458,12 @@ function main() {
         );
     }
 
-    const xml = buildCustomMetadataXml(data, versionNumber, currentUserName, isEdit);
+    const xml = buildCustomMetadataXml(
+        data,
+        versionNumber,
+        currentUserName,
+        isEdit
+    );
     const apiName = data.apiName;
     const fileName = `${addNamespace(
         'AvonniDynamicComponent'
@@ -380,8 +472,11 @@ function main() {
 
     mkdirSync(outDir, { recursive: true });
     writeFileSync(outPath, xml, 'utf8');
-
     process.stderr.write(`Wrote ${outPath}\n`);
+
+    if (prevDeveloperName) {
+        clearPrevLastModified(prevDeveloperName);
+    }
 }
 
 try {
