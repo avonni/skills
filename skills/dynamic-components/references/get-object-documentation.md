@@ -23,7 +23,7 @@ If the command succeeds, cache the result and use it directly. Do not call the s
 
 Run the commands exactly as written — do not modify, extend, or truncate them. Truncating the output can hide valid API names.
 
-## Error handling
+## Error Handling
 
 -   If the commands are failing because the `sf` command does not exist, stop and ask the user to install the Salesforce CLI.
 -   If the command to retrieve fields fails, run this command once: `sf sobject describe --sobject Account`.

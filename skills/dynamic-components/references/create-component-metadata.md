@@ -26,7 +26,7 @@ From the result:
 -   Use `currentVersion` as the candidate overwrite version number (may be `null`).
 -   Save `lastModifiedDeveloperName` for use in Step 4 (may be `null`).
 
-### Error handling
+### Error Handling
 
 -   If the script fails, retry once.
 -   If it still fails, inform the user and ask whether to continue. If continuing, use version `1` and skip Steps 2 and 4.
@@ -65,7 +65,7 @@ EOF
 -   On the **Create Path** (brand-new component), omit `_passthrough` entirely.
 -   The save script auto-generates all `id` fields (UUID v4), validates the structure, and automatically clears the `IsLastModified__c` flag on the previous version when `--prev-developer-name` is provided. If validation fails, it exits with a non-zero code and prints errors to stderr — the file will not be written.
 
-### Handling validation errors
+### Handling Validation Errors
 
 If the save script exits with validation errors:
 
@@ -73,3 +73,17 @@ If the save script exits with validation errors:
 -   Fix the component JSON.
 -   Re-run the command.
 
+## Step 4 — Remove "last modified" Flag From the Previous Version
+
+If you saved a `DeveloperName` in Step 1, run:
+
+```bash
+node <skill_base_directory>/scripts/remove-last-modified-flag.mjs <DeveloperName>
+```
+
+Replace `<DeveloperName>` with the saved value. The script finds the file locally under `./force-app`, retrieves it from Salesforce automatically if it is missing, and sets `avxp__IsLastModified__c` to false.
+
+### Error Handling
+
+-   If the script fails, inform the user of the error message and the file that was expected.
+-   Never skip this step silently.

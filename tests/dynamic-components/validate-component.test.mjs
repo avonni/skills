@@ -157,14 +157,14 @@ describe('Validate Component JSON', () => {
             /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
         test('component without id gets one assigned', () => {
-            const out = pass(withComponent(baseComp('dcCard', 'dcCard1')));
+            const out = pass(withComponent(baseComp('dcCard', 'Card1')));
             assert.match(out.value[0].id, UUID_RE);
         });
 
         test('existing valid UUID is preserved', () => {
             const id = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
             const out = pass(
-                withComponent({ ...baseComp('dcCard', 'dcCard1'), id })
+                withComponent({ ...baseComp('dcCard', 'Card1'), id })
             );
             assert.equal(out.value[0].id, id);
         });
@@ -204,17 +204,17 @@ describe('Validate Component JSON', () => {
 
     describe('component wrappers', () => {
         test('missing name', () => {
-            const { name: _, ...comp } = baseComp('dcCard', 'dcCard1');
+            const { name: _, ...comp } = baseComp('dcCard', 'Card1');
             fail(withComponent(comp), 'missing required field "name"');
         });
 
         test('missing apiName', () => {
-            const { apiName: _, ...comp } = baseComp('dcCard', 'dcCard1');
+            const { apiName: _, ...comp } = baseComp('dcCard', 'Card1');
             fail(withComponent(comp), 'missing required field "apiName"');
         });
 
         test('missing value', () => {
-            const { value: _, ...comp } = baseComp('dcCard', 'dcCard1');
+            const { value: _, ...comp } = baseComp('dcCard', 'Card1');
             fail(withComponent(comp), 'missing required field "value"');
         });
 
@@ -229,45 +229,40 @@ describe('Validate Component JSON', () => {
             fail(
                 minimal({
                     value: [
-                        baseComp('dcCard', 'dcCard1'),
-                        baseComp('dcCard', 'dcCard1')
+                        baseComp('dcCard', 'Card1'),
+                        baseComp('dcCard', 'Card1')
                     ]
                 }),
-                'Duplicate component apiName: "dcCard1"'
+                'Duplicate component apiName: "Card1"'
             );
         });
 
         test('duplicate component apiName across nested slots', () => {
-            const inner = baseComp('dcCard', 'dcCard1');
+            const inner = baseComp('dcCard', 'Card1');
             const outer = {
-                ...baseComp('dcContainer', 'dcCard1'),
+                ...baseComp('dcContainer', 'Card1'),
                 slots: [{ name: 'content', components: [inner] }]
             };
-            fail(
-                withComponent(outer),
-                'Duplicate component apiName: "dcCard1"'
-            );
+            fail(withComponent(outer), 'Duplicate component apiName: "Card1"');
         });
 
         test('inlineStyle must be a string', () => {
             fail(
-                withComponent(
-                    baseComp('dcCard', 'dcCard1', { inlineStyle: 42 })
-                ),
+                withComponent(baseComp('dcCard', 'Card1', { inlineStyle: 42 })),
                 'inlineStyle: must be a string'
             );
         });
 
         test('empty slots array is forbidden', () => {
             fail(
-                withComponent({ ...baseComp('dcCard', 'dcCard1'), slots: [] }),
+                withComponent({ ...baseComp('dcCard', 'Card1'), slots: [] }),
                 'empty slots array is forbidden'
             );
         });
 
         test('slot missing name', () => {
             const comp = {
-                ...baseComp('dcCard', 'dcCard1'),
+                ...baseComp('dcCard', 'Card1'),
                 slots: [{ components: [] }]
             };
             fail(withComponent(comp), 'missing required field "name"');
@@ -275,7 +270,7 @@ describe('Validate Component JSON', () => {
 
         test('slot components must be an array', () => {
             const comp = {
-                ...baseComp('dcCard', 'dcCard1'),
+                ...baseComp('dcCard', 'Card1'),
                 slots: [{ name: 'content', components: 'bad' }]
             };
             fail(withComponent(comp), 'must be an array');
@@ -289,7 +284,7 @@ describe('Validate Component JSON', () => {
     describe('visibility rules', () => {
         function compWithVisibility(rule) {
             return withComponent(
-                baseComp('dcCard', 'dcCard1', { visibilityRule: rule })
+                baseComp('dcCard', 'Card1', { visibilityRule: rule })
             );
         }
 
@@ -392,7 +387,7 @@ describe('Validate Component JSON', () => {
             pass(
                 withComponent({
                     name: 'dcAccordion',
-                    apiName: 'dcAccordion1',
+                    apiName: 'Accordion1',
                     value: {},
                     slots: [
                         {
@@ -414,12 +409,12 @@ describe('Validate Component JSON', () => {
             fail(
                 withComponent({
                     name: 'dcAccordion',
-                    apiName: 'dcAccordion1',
+                    apiName: 'Accordion1',
                     value: {},
                     slots: [
                         {
                             name: 'content',
-                            components: [baseComp('dcCard', 'dcCard1')]
+                            components: [baseComp('dcCard', 'Card1')]
                         }
                     ]
                 }),
@@ -449,7 +444,7 @@ describe('Validate Component JSON', () => {
             fail(
                 withComponent({
                     name: 'dcAccordion',
-                    apiName: 'dcAccordion1',
+                    apiName: 'Accordion1',
                     value: {},
                     slots: [
                         {
@@ -468,7 +463,7 @@ describe('Validate Component JSON', () => {
             fail(
                 withComponent({
                     name: 'dcAccordion',
-                    apiName: 'dcAccordion1',
+                    apiName: 'Accordion1',
                     value: {},
                     slots: [
                         {
@@ -495,7 +490,7 @@ describe('Validate Component JSON', () => {
         function layoutWithItems(items) {
             return withComponent({
                 name: 'dcLayout',
-                apiName: 'dcLayout1',
+                apiName: 'Layout1',
                 value: {},
                 slots: [
                     {
@@ -517,7 +512,7 @@ describe('Validate Component JSON', () => {
 
         test('non-avonniLayoutItem child in content slot', () => {
             fail(
-                layoutWithItems([baseComp('dcCard', 'dcCard1')]),
+                layoutWithItems([baseComp('dcCard', 'Card1')]),
                 'content slot only accepts avonniLayoutItem'
             );
         });
@@ -568,7 +563,7 @@ describe('Validate Component JSON', () => {
         function navContainer(items, slotComponents) {
             return withComponent({
                 name: 'dcNavigationContainer',
-                apiName: 'dcNav1',
+                apiName: 'Nav1',
                 value: { items },
                 slots: [{ name: 'content', components: slotComponents }]
             });
@@ -592,7 +587,7 @@ describe('Validate Component JSON', () => {
             fail(
                 navContainer(
                     [{ value: 'Tab1' }],
-                    [baseComp('dcCard', 'dcCard1')]
+                    [baseComp('dcCard', 'Card1')]
                 ),
                 'content slot only accepts dcContainer'
             );
@@ -638,7 +633,7 @@ describe('Validate Component JSON', () => {
             pass(
                 withComponent({
                     name: 'dcTabbedContainer',
-                    apiName: 'dcTabbed1',
+                    apiName: 'Tabbed1',
                     value: { items: [{ value: 'Tab1' }] },
                     slots: [
                         {
@@ -659,7 +654,7 @@ describe('Validate Component JSON', () => {
             fail(
                 withComponent({
                     name: 'dcTabbedContainer',
-                    apiName: 'dcTabbed1',
+                    apiName: 'Tabbed1',
                     value: { items: [{ value: 'Tab1' }] },
                     slots: [
                         {
@@ -691,7 +686,7 @@ describe('Validate Component JSON', () => {
                 slots: [
                     {
                         name: 'content',
-                        components: [baseComp('dcCard', 'dcCard1', childValue)]
+                        components: [baseComp('dcCard', 'Card1', childValue)]
                     }
                 ]
             });
@@ -925,7 +920,7 @@ describe('Validate Component JSON', () => {
             return minimal({
                 queries: [QUERY],
                 value: [
-                    baseComp('dcDatatable', 'dcDatatable1', {
+                    baseComp('dcDatatable', 'Datatable1', {
                         itemsTypeSelected: 'query',
                         ...valueOverrides
                     })

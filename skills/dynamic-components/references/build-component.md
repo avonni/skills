@@ -66,18 +66,18 @@ Required. Must be the exact name of the component, as written in its metadata.
 
 Required for every component wrapper. Must be unique across the entire value tree, including all nested slot components.
 
-#### Default naming pattern
+#### Default Naming Pattern
 
-component name + incremental integer starting at 1.
-Examples: `dcCard1`, `dcCard2`, `dcAlert1`
+component name without "dc" prefix + incremental integer starting at 1.
+Examples: `Card1`, `Card2`, `Alert1`
 
-#### Increment rules
+#### Increment Rules
 
--   The counter is per component type, not global. `dcCard1` and `dcAlert1` can coexist.
+-   The counter is per component type, not global. `Card1` and `Alert1` can coexist.
 -   Traverse the tree depth-first and assign numbers in the order components are encountered.
--   If the same component type appears in different slots or branches, continue the counter — never reset it. For example, two `dcCard` in a container and one `dcCard` in a sibling tab would be `dcCard1`, `dcCard2`, `dcCard3`.
+-   If the same component type appears in different slots or branches, continue the counter — never reset it. For example, two `dcCard` in a container and one `dcCard` in a sibling tab would be `Card1`, `Card2`, `Card3`.
 
-#### Conflict resolution
+#### Conflict Resolution
 
 -   Before finalizing output, verify no two components share the same `apiName`. If a conflict is detected, increment the suffix of the later component until the value is unique.
 -   Never reuse an `apiName` even if a component is in a different branch of the tree.
@@ -97,7 +97,7 @@ For any property of type `icon`:
 -   Use only valid Salesforce Lightning Design System icons, in the format `category:icon-name` (for example `standard:account`).
 -   Never invent icons.
 
-#### Conditional properties
+#### Conditional Properties
 
 Some properties can be used only if a condition is met (`"when": { condition }`). You can use them only if the component value matches the condition.
 For example:
@@ -126,10 +126,10 @@ When processing a component, always check its definition for an additional instr
 ## Data Display Components: `dataSources`
 
 -   If a component definition contains `dataSources`, it is a data display component.
--   Three data source types exist: `manual`, `query`, and `picklistValues`. Never generate other types.
+-   Three data source types exist: `static`, `query`, `variables` and `picklistValues`. Never generate other types.
 -   A component **cannot** use more than one data source type at the same time.
 -   It is mandatory you read and follow `data-sources.md` to set the correct binding properties for whichever type is needed.
--   **Special case:** If you are using a `dcTree` and/or a `dcRelationshipGraph` component, it is mandatory you also read and follow `nested-data-sources.md`.
+-   **Special case:** If you are using a `dcTree` and/or a `dcRelationshipGraph` component, it is mandatory you also read `nested-data-sources.md`. Its rules replace the **Query Binding** and **Picklist Data Source** sections of `data-sources.md` for those components. The Query Definition structure (filters, `filterVariables`, `filterVariablesTypes`, etc.) still applies.
 
 ## References
 
@@ -140,11 +140,11 @@ References are pointers to other elements that you can use as values. They follo
 -   Resource: `{!<resourceApiName>}` (e.g. `{!constant1}`).
 -   Global references: `{!$<category>.<referenceName>}` (e.g. `{!$Organization.City}`).
 
-### Component property reference
+### Component Property Reference
 
 A component can reference the value of another component's property using the pattern `{!componentApiName.componentProperty}`.
-For example, `{!dcHeader1.title}` is a reference to the value of the `title` property of the `dcHeader1` component.
-If a property has an object as a value, it is possible to reference the value of one of its keys. For example, `{!dcDatatable1.firstSelectedRowSObject.Name}` is a reference to the `Name` key of the `firstSelectedRowSObject` object value, of the `dcDatatable1` component.
+For example, `{!Header1.title}` is a reference to the value of the `title` property of the `Header1` component.
+If a property has an object as a value, it is possible to reference the value of one of its keys. For example, `{!Datatable1.firstSelectedRowSObject.Name}` is a reference to the `Name` key of the `firstSelectedRowSObject` object value, of the `Datatable1` component.
 
 ### Query
 
@@ -156,7 +156,14 @@ Resources are reusable references to a value.
 All resources must be in top-level `"resources": []`. If none: `"resources": []`.
 Allowed types are `constant`, `formula`, and `variable`.
 
-#### Constant structure
+#### Common Fields for Every Types
+
+-   `apiName`, `description`, `dataType` and `type` are always required.
+-   `apiName`: serves as the resource title and unique identifier. It should follow the API Name Rules below, be short and descriptive.
+-   `type`: `constant`, `formula` or `variable`.
+-   Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
+
+#### Constant Structure
 
 ```json
 {
@@ -168,10 +175,9 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   Required fields: `apiName`, `description`, `dataType`, `defaultValue`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
--   `type` is always equal to "constant".
+`defaultValue` is required for constant resources.
 
-#### Variable structure
+#### Variable Structure
 
 ```json
 {
@@ -185,11 +191,9 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   Required fields: `apiName`, `description`, `dataType`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
--   It is mandatory that `type` is "variable".
--   If the variable needs to be accessed outside of the Dynamic Component, availability should be set. Its value is an array of strings: `["input"] | ["output"] | ["input","output"]`.
+If the variable needs to be accessed outside of the Dynamic Component, availability should be set. Its value is an array of strings: `["input"] | ["output"] | ["input","output"]`.
 
-#### Formula structure
+#### Formula Structure
 
 ```json
 {
@@ -201,11 +205,9 @@ Allowed types are `constant`, `formula`, and `variable`.
 }
 ```
 
--   Required fields: `apiName`, `description`, `dataType`, `formula`, `type`. Do not generate or modify `id` — the validation script manages it. Preserve it when updating, omit it when creating.
--   It is mandatory that `type` is "formula".
--   Formula syntax = Salesforce formula functions (`TODAY()`, `ABS()`, `IF()`, etc.)
+`formula` is required for formula resources. Formula syntax = Salesforce formula functions (`TODAY()`, `ABS()`, `IF()`, etc.).
 
-### Global references
+### Global References
 
 Reference to a variable related to the user, the Salesforce org, the dynamic component settings, etc. Pattern: `{!$<Category>.<referenceName>}`.
 
@@ -289,7 +291,7 @@ Only `{!$System.OriginDateTime}` is available (type: `datetime`).
 -   CSS declarations separated by `;`
 -   Good practice: add spacing between sibling components so they are never visually flush against each other.
 
-### Token preference (mandatory):
+### Token Preference (Mandatory):
 
 Always prefer LWC tokens over raw values. Raw values (e.g., `"16px"`) are only acceptable when a token does not match the required style.
 Use the fallback value that corresponds to the token's intended value so the style degrades gracefully if the token is unavailable.
@@ -297,7 +299,7 @@ Use the fallback value that corresponds to the token's intended value so the sty
 -   Correct: `var(--lwc-spacingMedium, 1rem)`
 -   Avoid: `16px`
 
-**Spacing tokens:**
+**Spacing Tokens:**
 `--lwc-spacingNone` · `--lwc-spacingXxxSmall` · `--lwc-spacingXxSmall` · `--lwc-spacingXSmall` · `--lwc-spacingSmall` · `--lwc-spacingMedium` · `--lwc-spacingLarge` · `--lwc-spacingXLarge` · `--lwc-spacingXxLarge`
 
 ## Interactions
