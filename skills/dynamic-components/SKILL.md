@@ -11,11 +11,19 @@ metadata:
 
 ## Toolset
 
-This skill works exclusively with the **`dynamic` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "dynamic"` where applicable. Do not use this skill for standard Avonni LWC components (use the `avonni-components` skill instead).
+This skill works exclusively with the **`dynamic` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "dynamic"` where applicable. Do not use this skill for standard Avonni LWC components (use the `avonni-components` skill instead) or for Avonni Flow Screen Components (use the `flow-components` skill instead).
 
 ## Usage
 
 This skill describes how to use the Avonni Dynamic Components MCP to create or update components. You should use it for any user request that aims to create or update an Avonni Dynamic Component.
+
+## Prerequisites
+
+Check these before Step 0. They enforce the requirements listed in this skill's `compatibility` frontmatter:
+
+1. **Node.js >= 18** — run `node --version`. If the command fails or the major version is below 18, stop and ask the user to install Node.js 18 or newer. Do not proceed.
+2. **Avonni MCP server** — the first MCP call of the workflow (`list_components` with `toolset: "dynamic"`) doubles as the reachability check. If the Avonni MCP tools are not available in the session, or the call fails after one retry, stop and ask the user to configure the Avonni MCP server with the `dynamic` toolset. Never continue without the MCP.
+3. **Salesforce CLI** — run `sf --version`. If it fails, do NOT stop: warn the user once that the Salesforce CLI is not installed and that retrieving object and field documentation, querying component versions, and saving the component will be unavailable, then continue. The steps that need it stop with install instructions if reached (see `references/get-object-documentation.md` and `references/create-component-metadata.md`).
 
 ## Execution Workflow
 
@@ -101,14 +109,14 @@ If you need more information from the user:
 
 ## Failure Handling
 
-If a tool call fails:
+If an MCP tool call fails:
 
 -   retry once
 
 If it still fails:
 
--   inform the user
--   ask whether to continue without MCP
+-   inform the user that this skill cannot run without the Avonni MCP server and stop
+-   never generate output without MCP data
 
 If one component doc fails:
 

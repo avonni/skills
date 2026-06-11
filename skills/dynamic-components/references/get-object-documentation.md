@@ -26,5 +26,6 @@ Run the commands exactly as written — do not modify, extend, or truncate them.
 ## Error Handling
 
 -   If the commands are failing because the `sf` command does not exist, stop and ask the user to install the Salesforce CLI.
--   If the command to retrieve fields fails, run this command once: `sf sobject describe --sobject Account`.
+-   If the commands are failing because no default org is set (the error mentions a missing `target-org`), stop and ask the user which org to use, then set it as the default with `sf config set target-org <username-or-alias>` and retry.
+-   If the command to retrieve fields fails, run it once for the same object without the formatting pipe, to surface the raw error: `sf sobject describe --sobject <ObjectName>`.
 -   If the same command fails twice, inform the user and ask whether to continue without objects and fields.
