@@ -16,8 +16,19 @@
  * currentVersion and lastModifiedDeveloperName are null when no existing versions exist.
  */
 
-import { execSync } from 'node:child_process';
-import { detectNamespace } from './namespace.mjs';
+import { detectNamespace, escapeSoqlString, runSf } from './namespace.mjs';
+
+/**
+ * @param {string} name
+ * @returns {boolean}
+ */
+function isValidApiName(name) {
+    if (typeof name !== 'string' || name.length === 0) return false;
+    if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) return false;
+    if (name.endsWith('_')) return false;
+    if (name.includes('__')) return false;
+    return true;
+}
 
 function parseArgs(argv) {
     let apiName;
@@ -29,6 +40,11 @@ function parseArgs(argv) {
         }
     }
     if (!apiName) throw new Error('Usage: node query-versions.mjs --api-name <apiName>');
+    if (!isValidApiName(apiName)) {
+        throw new Error(
+            `Invalid apiName "${apiName}": must start with a letter and use only letters, digits, and single underscores.`
+        );
+    }
     return { apiName };
 }
 
@@ -40,8 +56,16 @@ function main() {
 
     let records = [];
     try {
-        const raw = execSync(
-            `sf data query --query "SELECT DeveloperName, ${ns}__VersionNumber__c, ${ns}__IsLastModified__c FROM ${ns}__AvonniDynamicComponent__mdt WHERE ${ns}__DynamicComponentName__c = '${apiName}'" --json`,
+        const raw = runSf(
+            [
+                'data',
+                'query',
+                '--query',
+                `SELECT DeveloperName, ${ns}__VersionNumber__c, ${ns}__IsLastModified__c FROM ${ns}__AvonniDynamicComponent__mdt WHERE ${ns}__DynamicComponentName__c = '${escapeSoqlString(
+                    apiName
+                )}'`,
+                '--json'
+            ],
             { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
         );
         records = JSON.parse(raw)?.result?.records ?? [];

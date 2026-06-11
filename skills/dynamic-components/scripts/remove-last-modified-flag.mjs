@@ -9,10 +9,9 @@
  *   node remove-last-modified-flag.mjs <DeveloperName> [--search-dir <dir>]
  */
 
-import { execSync } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { detectNamespace } from './namespace.mjs';
+import { detectNamespace, runSf } from './namespace.mjs';
 
 const NAMESPACE = detectNamespace();
 
@@ -99,6 +98,11 @@ function parseArgs(argv) {
             'Usage: node remove-last-modified-flag.mjs <DeveloperName> [--search-dir <dir>]'
         );
     }
+    if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(developerName)) {
+        throw new Error(
+            `Invalid DeveloperName "${developerName}": must start with a letter and use only letters, digits, and underscores.`
+        );
+    }
 
     return { developerName, searchDir };
 }
@@ -113,8 +117,14 @@ function main() {
             `File not found locally. Retrieving from Salesforce...\n`
         );
         try {
-            execSync(
-                `sf project retrieve start --metadata "CustomMetadata:${NAMESPACE}__AvonniDynamicComponent.${developerName}"`,
+            runSf(
+                [
+                    'project',
+                    'retrieve',
+                    'start',
+                    '--metadata',
+                    `CustomMetadata:${NAMESPACE}__AvonniDynamicComponent.${developerName}`
+                ],
                 { stdio: 'inherit' }
             );
         } catch (e) {
