@@ -118,6 +118,14 @@ avonni-some-component {
 -   Call `get_component_styles` once per component — cache the result and do not call it again for the same component.
 -   If `get_component_styles` returns an empty list, the component has no exposed styling hooks; inform the user.
 
+## Utility Functions
+
+The Avonni dev package exposes one utility function: **`removePageHeader`**.
+
+-   Call `get_util_docs` with `name: "removePageHeader"` before using it — do not rely on prior knowledge of its signature.
+-   Use it only when the user explicitly needs to hide the Salesforce page header.
+-   Call it from a lifecycle hook (e.g. `connectedCallback`) in the LWC JS file.
+
 ## Validation Checklist
 
 Before producing final code, confirm all of the following:
