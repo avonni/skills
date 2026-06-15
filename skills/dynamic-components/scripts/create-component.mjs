@@ -27,11 +27,10 @@
  * on update without any script changes.
  */
 
-import { execSync } from 'node:child_process';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { detectNamespace } from './namespace.mjs';
+import { detectNamespace, escapeSoqlString, runSf } from './namespace.mjs';
 import { validateComponent } from './validate-component.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -148,15 +147,32 @@ const MANAGED_FIELDS = new Set(
  */
 function fetchCurrentUserName() {
     try {
-        const username = execSync(
-            "sf org display user --json | jq -r '.result.username'",
-            { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
-        ).trim();
+        const userJson = runSf(['org', 'display', 'user', '--json'], {
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'pipe']
+        });
+        const username = JSON.parse(userJson)?.result?.username;
 
-        if (!username || username === 'null') return null;
+        // Salesforce usernames are email-format. Reject anything outside that
+        // safe charset so the value can never carry shell metacharacters.
+        if (
+            !username ||
+            typeof username !== 'string' ||
+            !/^[A-Za-z0-9@._+-]+$/.test(username)
+        ) {
+            return null;
+        }
 
-        const queryJson = execSync(
-            `sf data query --query "SELECT FirstName, LastName FROM User WHERE Username = '${username}'" --json`,
+        const queryJson = runSf(
+            [
+                'data',
+                'query',
+                '--query',
+                `SELECT FirstName, LastName FROM User WHERE Username = '${escapeSoqlString(
+                    username
+                )}'`,
+                '--json'
+            ],
             { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
         );
 
@@ -314,8 +330,14 @@ function clearPrevLastModified(developerName) {
     if (!filePath) {
         process.stderr.write(`Previous version file not found locally. Retrieving from Salesforce...\n`);
         try {
-            execSync(
-                `sf project retrieve start --metadata "CustomMetadata:${NAMESPACE}__AvonniDynamicComponent.${developerName}"`,
+            runSf(
+                [
+                    'project',
+                    'retrieve',
+                    'start',
+                    '--metadata',
+                    `CustomMetadata:${NAMESPACE}__AvonniDynamicComponent.${developerName}`
+                ],
                 { stdio: 'inherit' }
             );
         } catch (e) {
@@ -383,6 +405,11 @@ function parseArgs(argv) {
             const next = argv[i + 1];
             if (!next || next.startsWith('-')) {
                 throw new Error('--prev-developer-name requires a value');
+            }
+            if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(next)) {
+                throw new Error(
+                    `--prev-developer-name "${next}" is invalid: must start with a letter and use only letters, digits, and underscores.`
+                );
             }
             prevDeveloperName = next;
             i += 1;

@@ -4,6 +4,7 @@ Skills used to guide AI agents through the creation and update of Avonni compone
 
 -   For Avonni Dynamic Components, use the `dynamic-components` skill.
 -   For Avonni Developer Components, use the `avonni-components` skill.
+-   For Avonni Flow Screen Components inside Salesforce flows, use the `flow-components` skill.
 
 ## Installation
 
