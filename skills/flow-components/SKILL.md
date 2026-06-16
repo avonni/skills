@@ -11,7 +11,7 @@ metadata:
 
 ## Toolset
 
-This skill works exclusively with the **`flow` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "flow"` where applicable. Do not use this skill for standard Avonni LWC components (use the `avonni-components` skill instead) or for Avonni Dynamic Components (use the `dynamic-components` skill instead).
+This skill works exclusively with the **`flow` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "flow"` where applicable. Do not use this skill for standard Avonni LWC components, Avonni Experience Sites components, or for Avonni Dynamic Components.
 
 ## Scope
 

@@ -16,7 +16,7 @@ Use this skill whenever Avonni components need to be added to or used inside an 
 
 ## Toolset
 
-This skill works exclusively with the **`dev` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "dev"` where applicable. Do not use this skill for Dynamic Components (use the `dynamic-components` skill instead) or for Avonni Flow Screen Components (use the `flow-components` skill instead).
+This skill works exclusively with the **`dev` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "dev"` where applicable. Do not use this skill for Avonni Dynamic Components, Avonni Experience Sites components or for Avonni Flow Screen Components.
 
 If the Avonni MCP tools are not available in the session, stop and ask the user to configure the Avonni MCP server with the `dev` toolset. Never continue without the MCP.
 
