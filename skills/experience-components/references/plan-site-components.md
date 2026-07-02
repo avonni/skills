@@ -30,11 +30,21 @@ Your goal is to create a plan describing the Avonni components that will be adde
 -   Only include features that clearly support the user's requirements. Do not mention properties that are not relevant.
 -   Your plan CANNOT include features that are not available in the components documentation.
 
+## Identify the Data Source
+
+Some components (e.g. List) display a collection. When a component's docs include `dataSources`, decide how its data will be fed:
+
+1. **Query data source** — the component loads Salesforce records itself. Use when the user wants to show live records of an object.
+2. **Static data source** — fixed, hardcoded items unrelated to any Salesforce object.
+3. **CMS collection** — CMS collection displayed as component items.
+
+Read `references/data-sources.md` for how each is serialized. Only plan a data source documented in the `dataSources` object of the component docs.
+
 ## Identify Interactions
 
--   If the user needs components to react to events (button clicks, item clicks → navigation), check the available interactions.
+-   If the user needs to interact with the components (select items, click elements, etc.), check the available interactions.
 -   Call `list_interactions` with `toolset: "experience"` to get the list of available interactions.
--   Read `references/interactions.md` for how interactions are configured. Properties typed `interaction[]` (for example a button's `evtClick`, or a list item mapping's `evtclick`) hold these interactions.
+-   Read `references/interactions.md` for how interactions are configured. Properties typed `interaction` hold these interactions.
 
 ## Identify Styles
 
@@ -43,12 +53,6 @@ Your goal is to create a plan describing the Avonni components that will be adde
     -   Pass the component name as a single `name` string input.
     -   Never batch multiple components into one call.
 -   Read `references/styling.md`.
-
-## Identify the Target Site and View
-
--   Determine which site and which view (page) the components belong to. The target view is `…/sfdc_cms__view/<view>/content.json`.
--   If the user asked to update components, identify which existing Avonni components are affected.
--   Never plan to create a site, route, theme, branding set, or view. If the target page does not exist, stop and tell the user to create it first with their usual Digital Experience tooling.
 
 ## Identify What Objects Are Used
 
@@ -66,8 +70,7 @@ Your goal is to create a plan describing the Avonni components that will be adde
 
 ## Tool Usage
 
--   You can never call `get_component_docs` before calling `list_components`.
--   Never assume the name of a component, always check the `list_components` output.
+-   Never assume the name of a component, always check the `list_components` output and then call `get_component_docs`.
 -   Only retrieve docs for components you actually plan to use.
 
 ## Unknown or Ambiguous Request

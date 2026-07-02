@@ -54,10 +54,10 @@ Each property from the component's docs becomes a key in `attributes`. **How a v
     "variant": "brand"
     ```
 
--   **Objects, arrays, and interactions** (`object`, `record`, `interaction[]`, and the serialized `*Attributes` blobs) → a **compact JSON string** (the object encoded with `JSON.stringify`, no surrounding whitespace), stored as the attribute's string value. For example a List's data source:
+-   **Objects, arrays, and interactions** (`object`, `record`, `interaction`, and the serialized `*Attributes` blobs) → a **compact JSON string** (the object encoded with `JSON.stringify`, no surrounding whitespace), stored as the attribute's string value. For example a List's data source:
 
     ```json
-    "items": "{\"type\":\"query\",\"querySObjectApiName\":\"Account\",\"querySObjectMapping\":{\"label\":\"{{Record.Name}}\",\"name\":\"{{Record.Id}}\",\"target\":\"_self\",\"evtclick\":{\"type\":\"NavigationMixinNavigate\",\"navigationMixinNavigateType\":\"standard__recordPage\",\"navigationMixinNavigateRecordPageActionName\":\"view\"}}}"
+    "items": "{\"type\":\"query\",\"querySObjectApiName\":\"Account\",\"querySObjectMapping\":{\"label\":\"{{Record.Name}}\",\"name\":\"{{Record.Id}}\",\"evtclick\":{\"type\":\"NavigationMixinNavigate\",\"navigationMixinNavigateType\":\"standard__recordPage\",\"navigationMixinNavigateRecordPageRecordId\":\"{{Record.Id}}\",\"navigationMixinNavigateRecordPageActionName\":\"view\"}}}"
     ```
 
     See `references/data-sources.md` for `items` and `references/interactions.md` for `evtClick`/`evtclick`. For `*Attributes` blobs the MCP marks as serialized JSON, only set them when the user asks and you know the shape — otherwise leave them out.

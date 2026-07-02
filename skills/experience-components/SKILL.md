@@ -21,10 +21,10 @@ It does **not** cover creating or configuring the site itself: sites, routes (`s
 
 ## Prerequisites
 
-Check these before Step 0. They enforce the requirements listed in this skill's `compatibility` frontmatter:
+Check these before Step 1. They enforce the requirements listed in this skill's `compatibility` frontmatter:
 
 1. **Node.js >= 18** — run `node --version`. If the command fails or the major version is below 18, stop and ask the user to install Node.js 18 or newer. Do not proceed.
-2. **Avonni MCP server** — the first MCP call of the workflow (`list_components` with `toolset: "experience"`) doubles as the reachability check. If the Avonni MCP tools are not available in the session, or the call fails after one retry, stop and ask the user to configure the Avonni MCP server with the `experience` toolset. Never continue without the MCP.
+2. **Avonni MCP server** — the first MCP call of the workflow (whichever tool it is, always with `toolset: "experience"`) doubles as the reachability check. If the Avonni MCP tools are not available in the session, or the call fails after one retry, stop and ask the user to configure the Avonni MCP server with the `experience` toolset. Never continue without the MCP.
 3. **Salesforce CLI** — run `sf --version`. If it fails, do NOT stop: warn the user once that the Salesforce CLI is not installed and that retrieving object and field documentation will be unavailable, then continue. The steps that need it stop with install instructions if reached.
 
 ## Execution Workflow
@@ -88,7 +88,7 @@ Run `node <skill_base_directory>/scripts/validate-view.mjs <path-to-content.json
 
 ### Global Output Rules
 
-When referring to components or interactions, use their label, not their name.
+When referring to components or interactions, use a natural-language label derived from their name: remove the `xpc` prefix (for components) and insert spaces between words.
 **Examples:**
 xpcList → List
 xpcAccordionSection → Accordion Section

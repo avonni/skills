@@ -27,23 +27,9 @@ So the nesting always alternates: component → regions → components → regio
 
 Walk the tree and collect every component node whose `definition` starts with `avxp:` — these are the Avonni components. For each, note:
 
--   the component label (resolve the name after `avxp:` via `get_component_docs` if needed),
+-   the component name (what is after `avxp:` and starts with `xpc`; resolve it via `get_component_docs` if needed),
 -   its `id`,
 -   its parent region's `name` (the slot it sits in),
 -   the key configured `attributes`.
 
-Non-Avonni nodes (`community_layout:section`, `community_layout:sldsFlexibleLayout`, `dxp_base:textBlock`, `community_builder:*`, etc.) are layout/standard components — note them as structure, but do not modify them unless the request is specifically about them.
-
-## Present to the User
-
-On the Update Path, present the current Avonni components in reading order (top to bottom, by slot), using their labels and a short summary of what each is configured to do. Then ask what to change.
-
-## Choosing the Insertion Region (Add Path)
-
-To add a component you must pick the **region** whose `children` array will receive the new node:
-
--   To place a component directly on the page, use a layout column region (a `community_layout:section`'s column region, e.g. `name: "col1"`) inside the main content region.
--   To place a component inside an Avonni container, use the matching slot region of that container (e.g. an Accordion's `content` region, an Accordion Section's `title`/`actions`/`content` regions). The region `name` must equal one of the parent component's documented slot names (`get_component_docs` → `slots`).
--   If the intended region does not exist yet (e.g. an Accordion Section has no `actions` region), you may add the missing region node — see `references/build-view-content.md`.
-
-Never invent a layout: reuse the existing sections/columns of the page unless the user asks to add a component into a specific container.
+Non-Avonni nodes (`community_layout:section`, `community_layout:sldsFlexibleLayout`, `dxp_base:textBlock`, `community_builder:*`, etc.) are layout/standard components — note them as structure, but do not modify them.
