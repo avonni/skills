@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Validates the structure of a Digital Experience view's content.json — in
- * particular the Avonni (avxp:) component nodes and the region nodes that hold
- * them.
+ * particular the Avonni (avxp: or avcmpbuilder:) component nodes and the
+ * region nodes that hold them.
  *
  * Usage:
  *   node validate-view.mjs <path-to-content.json>
@@ -14,6 +14,8 @@
  *   - every node has a unique `id` that is a valid UUID,
  *   - component nodes have a `definition` of the form "namespace:name", an
  *     object `attributes` (when present), and children that are all regions,
+ *   - Avonni components all use a single package namespace — a view must not
+ *     mix avxp: and avcmpbuilder: nodes,
  *   - region nodes have a `name`, and children that are all components,
  *   - the component/region nesting alternates (component → regions → components),
  *   - every string attribute value that looks like JSON (starts with { or [)
@@ -40,8 +42,11 @@ if (!path) {
     process.exit(1);
 }
 
+const AVONNI_NAMESPACES = ['avxp', 'avcmpbuilder'];
+
 const errors = [];
 const ids = new Map();
+const avonniNamespacesSeen = new Set();
 
 let root;
 try {
@@ -106,6 +111,11 @@ function walk(node, where) {
             errors.push(
                 `${where}: component "definition" must look like "namespace:name" (got ${JSON.stringify(node.definition)}).`
             );
+        } else {
+            const prefix = node.definition.split(':')[0];
+            if (AVONNI_NAMESPACES.includes(prefix)) {
+                avonniNamespacesSeen.add(prefix);
+            }
         }
         checkAttributes(node, label);
         if (node.children !== undefined) {
@@ -152,6 +162,14 @@ if (root) walk(root, 'root');
 
 for (const [id, count] of ids) {
     if (count > 1) errors.push(`Duplicate id "${id}" used ${count} times.`);
+}
+
+if (avonniNamespacesSeen.size > 1) {
+    errors.push(
+        `View mixes Avonni package namespaces (${[...avonniNamespacesSeen].join(
+            ', '
+        )}) — all Avonni components must use the single namespace of the installed package.`
+    );
 }
 
 if (errors.length) {

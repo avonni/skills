@@ -1,6 +1,6 @@
 ---
 name: experience-components
-description: Add, update, or remove Avonni components inside an existing Salesforce Digital Experience site. Use when the user wants to place Avonni components on a site page, when editing a site view's content.json that contains avxp: components, or when wiring those components to records, navigation, or styling. Does not cover creating the site, routes, themes, branding, or layouts — only the integration of Avonni components into an existing site.
+description: Add, update, or remove Avonni components inside an existing Salesforce Digital Experience site. Use when the user wants to place Avonni components on a site page, when editing a site view's content.json that contains avxp: or avcmpbuilder: components, or when wiring those components to records, navigation, or styling. Does not cover creating the site, routes, themes, branding, or layouts — only the integration of Avonni components into an existing site.
 license: MIT
 compatibility: Requires Node.js >=18, the Avonni MCP server (experience toolset), and Salesforce CLI.
 metadata:
@@ -13,9 +13,23 @@ metadata:
 
 This skill works exclusively with the **`experience` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "experience"` where applicable. Do not use this skill for standard Avonni LWC components, Avonni Dynamic Components, or Avonni Flow Screen Components.
 
+## Package Namespace
+
+Avonni Experience components are delivered by a managed package whose namespace is either **`avxp`** or **`avcmpbuilder`**, depending on which package the user's org has installed. The namespace is the prefix of every Avonni component `definition` in a view's `content.json` (e.g. `avxp:xpcButton` or `avcmpbuilder:xpcButton`).
+
+Detect it once per task in Step 1 by running:
+
+```
+node <skill_base_directory>/scripts/namespace.mjs <path-to-content.json>
+```
+
+The script checks, in order: the `AVONNI_XP_PACKAGE_NAMESPACE` env var, the namespaces already used by Avonni nodes in the view, and the packages installed in the org (via the Salesforce CLI), falling back to `avxp`. If it exits with an ambiguity error (both packages installed, no other signal), ask the user which package their site uses before continuing. If it warns that no Avonni Experience package was detected in the org, relay that warning to the user — the components you generate will not render on the site until a package is installed — then continue normally.
+
+Wherever this skill or its references write `<namespace>:` (or show `avxp:` in an example), use the detected namespace. Never hardcode a namespace, and never mix both namespaces in the same view.
+
 ## Scope
 
-This skill governs **only** the integration of Avonni components into an **existing** Digital Experience site — the `avxp:` component nodes inside a view's `content.json` (under `force-app/main/default/digitalExperiences/site/<site>/sfdc_cms__view/<view>/content.json`). It covers how to discover, configure, validate, and write those component nodes.
+This skill governs **only** the integration of Avonni components into an **existing** Digital Experience site — the Avonni (`avxp:` or `avcmpbuilder:`) component nodes inside a view's `content.json` (under `force-app/main/default/digitalExperiences/site/<site>/sfdc_cms__view/<view>/content.json`). It covers how to discover, configure, validate, and write those component nodes.
 
 It does **not** cover creating or configuring the site itself: sites, routes (`sfdc_cms__route`), themes (`sfdc_cms__theme`), branding sets, theme layouts, or pages must already exist and are handled by general Digital Experience tooling. When updating an existing view, never restructure, reformat, or rewrite anything outside the Avonni component nodes you were asked to change — leave layout sections, hidden regions, and non-Avonni components (e.g. `dxp_base:textBlock`, `community_*`) untouched unless the request is specifically about moving an Avonni component between them.
 
@@ -36,6 +50,7 @@ To produce your output, you MUST follow the steps below in order — you cannot 
 Read `references/read-site-view.md` and follow its instructions to:
 
 -   Locate `content.json` for the target view. If you cannot find it, ask the user which site and view (page) they mean and locate `…/sfdc_cms__view/<view>/content.json`. Never create the site, route, theme, or view using this skill — if the target view does not exist, stop and tell the user to create the page first with their usual Digital Experience tooling.
+-   Detect the package namespace: run `node <skill_base_directory>/scripts/namespace.mjs <path-to-content.json>` (see **Package Namespace**) and use its result as `<namespace>` for the rest of the task.
 -   Walk the component tree and identify the existing layout regions and all current Avonni components.
 -   If the user has not yet described what they want to add, change, or remove, present the existing Avonni components in reading order (top to bottom, by slot), using their labels and a short summary of what each is configured to do, then ask what they want to change. Otherwise, proceed directly to Step 2.
 
@@ -55,8 +70,8 @@ Ask the user to validate your plan.
 Read `references/build-view-content.md`. Apply the planned changes strictly following the instructions in that file.
 
 -   Insert new component nodes into the chosen region's `children` array at the position the plan specifies (default: end of the array).
--   Edit only the `attributes` (or slot `children`) of targeted existing `avxp:` nodes — keep their `id`.
--   Remove targeted `avxp:` component nodes from their parent region's `children`. If removal empties a region you added, remove that region too; never remove pre-existing layout regions.
+-   Edit only the `attributes` (or slot `children`) of targeted existing `<namespace>:` nodes — keep their `id`.
+-   Remove targeted `<namespace>:` component nodes from their parent region's `children`. If removal empties a region you added, remove that region too; never remove pre-existing layout regions.
 -   Leave every other part of the view untouched, including formatting and node order.
 
 ### Step 5 — Validate

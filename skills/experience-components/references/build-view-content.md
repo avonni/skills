@@ -1,6 +1,8 @@
 # Building Component Nodes in a View
 
-This reference defines exactly how to write Avonni component nodes into a view's `content.json`. Build only the `avxp:` nodes (and the region nodes that hold them); never touch the rest of the file.
+This reference defines exactly how to write Avonni component nodes into a view's `content.json`. Build only the `<namespace>:` nodes (and the region nodes that hold them); never touch the rest of the file.
+
+`<namespace>` is the package namespace detected in Step 1 (`avxp` or `avcmpbuilder`, via `scripts/namespace.mjs`). The examples below use `avxp:`; substitute the detected namespace verbatim. Never mix both namespaces in one view.
 
 ## Node Grammar
 
@@ -10,7 +12,7 @@ The tree alternates **component** and **region** nodes.
 
 ```json
 {
-    "definition": "avxp:<componentName>",
+    "definition": "<namespace>:<componentName>",
     "id": "<UUID>",
     "type": "component",
     "attributes": { ... },
@@ -18,7 +20,7 @@ The tree alternates **component** and **region** nodes.
 }
 ```
 
--   `definition` — always `avxp:` + the exact component name from `list_components` (e.g. `avxp:xpcButton`, `avxp:xpcList`, `avxp:xpcAccordion`). Never invent the name; use the MCP name verbatim.
+-   `definition` — always the detected `<namespace>:` + the exact component name from `list_components` (e.g. `avxp:xpcButton`, `avcmpbuilder:xpcList`). Never invent the name; use the MCP name verbatim.
 -   `id` — a fresh UUID, unique within the whole file. Generate one per node with `node <skill_base_directory>/scripts/new-uuids.mjs <count>`. Never reuse an existing id.
 -   `type` — always the literal `"component"`.
 -   `attributes` — the configured properties (see **Attributes**). Omit the key when there are none.
@@ -93,7 +95,7 @@ When a component has slots, build a region node per filled slot and nest the chi
 }
 ```
 
-An Accordion (`avxp:xpcAccordion`) holds Accordion Sections in its `content` region; each Section exposes `title`, `actions`, and `content` slots. Verify slot names with `get_component_docs`.
+An Accordion (`<namespace>:xpcAccordion`) holds Accordion Sections in its `content` region; each Section exposes `title`, `actions`, and `content` slots. Verify slot names with `get_component_docs`.
 
 ## Placing a Component on the Page
 
@@ -110,8 +112,8 @@ A `community_layout:section`'s column is declared both as a region node and insi
 ## Editing Rules
 
 -   **Add:** insert new component nodes into the chosen region's `children` array, at the position the plan specifies (default: end of the array).
--   **Update:** change only the `attributes` (or slot `children`) of the targeted `avxp:` node, found by its `id` or definition+position. Keep its `id`.
--   **Remove:** delete the targeted `avxp:` component node from its parent region's `children`. If removing it empties a region you added, remove that region too; never remove pre-existing layout regions.
+-   **Update:** change only the `attributes` (or slot `children`) of the targeted `<namespace>:` node, found by its `id` or definition+position. Keep its `id`.
+-   **Remove:** delete the targeted `<namespace>:` component node from its parent region's `children`. If removing it empties a region you added, remove that region too; never remove pre-existing layout regions.
 -   Preserve the file's existing formatting and the order of everything you did not change.
 
 After writing, run `node <skill_base_directory>/scripts/validate-view.mjs <path-to-content.json>` and fix any errors in the nodes you touched.
