@@ -1,6 +1,6 @@
 ---
 name: flow-components
-description: Add, update, or remove Avonni Flow Screen Components inside a Salesforce flow. Use when the user wants Avonni components in a screen flow, when editing flow XML that contains avcmpbuilder extensions, or when creating a new screen flow built around Avonni components. Does not cover general flow logic (decisions, assignments, record operations).
+description: Add, update, or remove Avonni Flow Screen Components inside a Salesforce flow. Use when the user wants Avonni components in a screen flow, when editing flow XML that contains avcmpbuilder extensions, or when creating a new screen flow built around Avonni components. Does not cover general flow logic (decisions, assignments, record operations). Do NOT use when the request spans multiple Avonni artifact types (e.g. the flow plus a dynamic component or portal page that launches it) — use the avonni-architect skill instead.
 license: MIT
 compatibility: Requires Node.js >=18, the Avonni MCP server (flow toolset), and Salesforce CLI.
 metadata:
@@ -19,9 +19,11 @@ This skill governs **only** the Avonni screen component fields inside a flow —
 
 It does **not** cover general flow logic. When a request also requires decisions, assignments, loops, record operations, or other flow elements, build the Avonni screen fields with this skill and handle the rest of the flow outside of it. When updating an existing flow, never restructure, reformat, or rewrite anything outside the Avonni component fields you were asked to change.
 
+If the request also requires building the artifact that launches or hosts this flow (a Dynamic Component, an Experience site page), stop and tell the user to restart with the avonni-architect skill. If no skill named avonni-architect is available, redirect to any skill whose purpose is orchestrating multi-artifact Avonni solutions; if none exists, suggest installing it with `npx skills avonni/skills`.
+
 ## Prerequisites
 
-Check these before Step 0. They enforce the requirements listed in this skill's `compatibility` frontmatter:
+Check these before Step 0. They enforce the requirements listed in this skill's `compatibility` frontmatter. If a check was already performed earlier in this session (e.g. by the avonni-architect skill before dispatching), do not repeat it — reuse its result:
 
 1. **Node.js >= 18** — run `node --version`. If the command fails or the major version is below 18, stop and ask the user to install Node.js 18 or newer. Do not proceed.
 2. **Avonni MCP server** — the first MCP call of the workflow (`list_components` with `toolset: "flow"`) doubles as the reachability check. If the Avonni MCP tools are not available in the session, or the call fails after one retry, stop and ask the user to configure the Avonni MCP server with the `flow` toolset. Never continue without the MCP.

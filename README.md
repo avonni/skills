@@ -2,6 +2,7 @@
 
 Skills used to guide AI agents through the creation and update of Avonni components.
 
+-   For end-to-end use cases spanning several Avonni artifact types, use the `avonni-architect` skill — it plans the architecture and invokes the other skills in dependency order.
 -   For Avonni Dynamic Components, use the `dynamic-components` skill.
 -   For Avonni Developer Components, use the `avonni-components` skill.
 -   For Avonni Flow Screen Components inside Salesforce flows, use the `flow-components` skill.

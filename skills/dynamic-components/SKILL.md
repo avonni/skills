@@ -1,6 +1,6 @@
 ---
 name: dynamic-components
-description: Create or update Avonni Dynamic Components. Use when the user asks to build, generate, or modify a dynamic component, or when working with Dynamic Component JSON, queries, resources, or metadata files.
+description: Create or update Avonni Dynamic Components. Use when the user asks to build, generate, or modify a dynamic component, or when working with Dynamic Component JSON, queries, resources, or metadata files. Do NOT use when the request spans multiple Avonni artifact types or describes an end-to-end use case (a component plus the flow it launches, a portal page, etc.) — use the avonni-architect skill instead.
 license: MIT
 compatibility: Requires Node.js >=18, the Avonni MCP server (dynamic toolset), and Salesforce CLI.
 metadata:
@@ -17,9 +17,11 @@ This skill works exclusively with the **`dynamic` toolset** of the Avonni MCP. A
 
 This skill describes how to use the Avonni Dynamic Components MCP to create or update components. You should use it for any user request that aims to create or update an Avonni Dynamic Component.
 
+If while working you discover the request also requires building another artifact type (a flow this component must launch, an Experience site page, another dynamic component to open), stop and tell the user to restart with the avonni-architect skill — do not build the other artifact with this skill. If no skill named avonni-architect is available, redirect to any skill whose purpose is orchestrating multi-artifact Avonni solutions; if none exists, suggest installing it with `npx skills avonni/skills`.
+
 ## Prerequisites
 
-Check these before Step 0. They enforce the requirements listed in this skill's `compatibility` frontmatter:
+Check these before Step 0. They enforce the requirements listed in this skill's `compatibility` frontmatter. If a check was already performed earlier in this session (e.g. by the avonni-architect skill before dispatching), do not repeat it — reuse its result:
 
 1. **Node.js >= 18** — run `node --version`. If the command fails or the major version is below 18, stop and ask the user to install Node.js 18 or newer. Do not proceed.
 2. **Avonni MCP server** — the first MCP call of the workflow (`list_components` with `toolset: "dynamic"`) doubles as the reachability check. If the Avonni MCP tools are not available in the session, or the call fails after one retry, stop and ask the user to configure the Avonni MCP server with the `dynamic` toolset. Never continue without the MCP.

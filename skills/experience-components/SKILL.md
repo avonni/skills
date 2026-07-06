@@ -1,6 +1,6 @@
 ---
 name: experience-components
-description: Add, update, or remove Avonni components inside an existing Salesforce Digital Experience site. Use when the user wants to place Avonni components on a site page, when editing a site view's content.json that contains avxp: or avcmpbuilder: components, or when wiring those components to records, navigation, or styling. Does not cover creating the site, routes, themes, branding, or layouts — only the integration of Avonni components into an existing site.
+description: Add, update, or remove Avonni components inside an existing Salesforce Digital Experience site. Use when the user wants to place Avonni components on a site page, when editing a site view's content.json that contains avxp: or avcmpbuilder: components, or when wiring those components to records, navigation, or styling. Does not cover creating the site, routes, themes, branding, or layouts — only the integration of Avonni components into an existing site. Do NOT use when the request spans multiple Avonni artifact types (e.g. the site page plus a flow it opens) — use the avonni-architect skill instead.
 license: MIT
 compatibility: Requires Node.js >=18, the Avonni MCP server (experience toolset), and Salesforce CLI.
 metadata:
@@ -33,9 +33,11 @@ This skill governs **only** the integration of Avonni components into an **exist
 
 It does **not** cover creating or configuring the site itself: sites, routes (`sfdc_cms__route`), themes (`sfdc_cms__theme`), branding sets, theme layouts, or pages must already exist and are handled by general Digital Experience tooling. When updating an existing view, never restructure, reformat, or rewrite anything outside the Avonni component nodes you were asked to change — leave layout sections, hidden regions, and non-Avonni components (e.g. `dxp_base:textBlock`, `community_*`) untouched unless the request is specifically about moving an Avonni component between them.
 
+If the request also requires building a flow or Dynamic Component the site components will call, stop and tell the user to restart with the avonni-architect skill. If no skill named avonni-architect is available, redirect to any skill whose purpose is orchestrating multi-artifact Avonni solutions; if none exists, suggest installing it with `npx skills avonni/skills`.
+
 ## Prerequisites
 
-Check these before Step 1. They enforce the requirements listed in this skill's `compatibility` frontmatter:
+Check these before Step 1. They enforce the requirements listed in this skill's `compatibility` frontmatter. If a check was already performed earlier in this session (e.g. by the avonni-architect skill before dispatching), do not repeat it — reuse its result:
 
 1. **Node.js >= 18** — run `node --version`. If the command fails or the major version is below 18, stop and ask the user to install Node.js 18 or newer. Do not proceed.
 2. **Avonni MCP server** — the first MCP call of the workflow (whichever tool it is, always with `toolset: "experience"`) doubles as the reachability check. If the Avonni MCP tools are not available in the session, or the call fails after one retry, stop and ask the user to configure the Avonni MCP server with the `experience` toolset. Never continue without the MCP.
