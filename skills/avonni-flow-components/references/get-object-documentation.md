@@ -15,13 +15,13 @@ If the command succeeds, cache the result and use it directly. Do not call this 
 
 ## Get Fields List
 
-For each object you pick, run the following command to get a list of its fields, replacing `<ObjectName>` with the object API name. For example, for Account: `FORCE_COLOR=0 NO_COLOR=1 sf sobject describe --sobject Account --json 2>/dev/null | node -e "JSON.parse(require('fs').readFileSync(0,'utf8')).result.fields.forEach(f=>console.log(f.name,'-',f.type, f.referenceTo.length && f.type === 'reference' ? 'to: ' + f.referenceTo.join(', ') : ''));"`
+For each object you pick, run the following command to get a list of its fields, replacing `<ObjectName>` with the object API name (e.g. `Account`, `Case`, `My_Object__c`): `FORCE_COLOR=0 NO_COLOR=1 sf sobject describe --sobject <ObjectName> --json 2>/dev/null | node -e "JSON.parse(require('fs').readFileSync(0,'utf8')).result.fields.forEach(f=>console.log(f.name,'-',f.type, f.referenceTo.length && f.type === 'reference' ? 'to: ' + f.referenceTo.join(', ') : ''));"`
 
 If the command succeeds, cache the result and use it directly. Do not call the same object again.
 
 ## Command Syntax (Mandatory)
 
-Run the commands exactly as written — do not modify, extend, or truncate them. Truncating the output can hide valid API names.
+Run the commands exactly as written, substituting only `<ObjectName>` — do not otherwise modify, extend, or truncate them. Truncating the output can hide valid API names.
 
 ## Error Handling
 
