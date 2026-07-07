@@ -54,7 +54,7 @@ function main() {
 
     const empty = { nextVersion: 1, currentVersion: null, lastModifiedDeveloperName: null };
 
-    let records = [];
+    let records;
     try {
         const raw = runSf(
             [
