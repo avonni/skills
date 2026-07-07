@@ -22,7 +22,7 @@
     "author": "Avonni",
     "license": "MIT",
     "engines": {
-        "node": ">=18"
+        "node": ">=20.19.0"
     },
     "bugs": {
         "url": "https://github.com/avonni/skills/issues"
