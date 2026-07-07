@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = join(
     dirname(fileURLToPath(import.meta.url)),
-    '../../skills/experience-components/scripts/new-uuids.mjs'
+    '../../skills/avonni-experience-components/scripts/new-uuids.mjs'
 );
 
 const UUID_RE =
