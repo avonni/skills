@@ -13,11 +13,11 @@ metadata:
 
 This skill designs the architecture of a multi-artifact Avonni solution and dispatches the build work. It never builds an artifact itself — every artifact is built by exactly one of the three Avonni artifact skills, invoked through the Skill tool:
 
-| Artifact type                                  | Owning skill            |
-| ---------------------------------------------- | ----------------------- |
-| Avonni Dynamic Component                       | `dynamic-components`    |
-| Avonni Flow Screen Components (screen flow)    | `flow-components`       |
-| Avonni components in a Digital Experience site | `experience-components` |
+| Artifact type                                  | Owning skill                   |
+| ---------------------------------------------- | ------------------------------ |
+| Avonni Dynamic Component                       | `avonni-dynamic-components`    |
+| Avonni Flow Screen Components (screen flow)    | `avonni-flow-components`       |
+| Avonni components in a Digital Experience site | `avonni-experience-components` |
 
 ## Toolset
 

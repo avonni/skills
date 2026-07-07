@@ -28,7 +28,7 @@ End the plan with a numbered **build order**, one line of justification per depe
 
 1. Flows before anything that launches them: the Execute Flow, Open Flow Dialog, and Open Flow Panel interactions reference the flow API name, which must exist first.
 2. Callee dynamic components before the dynamic components that open them via dialog or panel.
-3. A flow and its Avonni screen components are one unit — `flow-components` builds both in a single dispatch.
+3. A flow and its Avonni screen components are one unit — `avonni-flow-components` builds both in a single dispatch.
 4. Experience site components last among artifacts that only consume others, since site views typically reference flows and navigation targets.
 5. If two artifacts reference each other (A opens B and B opens A): build both with the wiring in one direction only, then dispatch an **update** invocation of the first artifact's skill to add the back-reference. Call this out explicitly in the plan.
 

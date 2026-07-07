@@ -4,11 +4,11 @@ Which Avonni artifact can call or embed which, and which skill owns building eac
 
 ## Artifact Types and Owners
 
-| Artifact type                                  | Owning skill            | Toolset      | Output                                       |
-| ---------------------------------------------- | ----------------------- | ------------ | -------------------------------------------- |
-| Avonni Dynamic Component                       | `dynamic-components`    | `dynamic`    | Custom metadata record file (component JSON) |
-| Avonni Flow Screen Components (screen flow)    | `flow-components`       | `flow`       | `.flow-meta.xml` file                        |
-| Avonni components in a Digital Experience site | `experience-components` | `experience` | Modified site view `content.json`            |
+| Artifact type                                  | Owning skill                   | Toolset      | Output                                       |
+| ---------------------------------------------- | ------------------------------ | ------------ | -------------------------------------------- |
+| Avonni Dynamic Component                       | `avonni-dynamic-components`    | `dynamic`    | Custom metadata record file (component JSON) |
+| Avonni Flow Screen Components (screen flow)    | `avonni-flow-components`       | `flow`       | `.flow-meta.xml` file                        |
+| Avonni components in a Digital Experience site | `avonni-experience-components` | `experience` | Modified site view `content.json`            |
 
 ## Who Can Call Whom
 
@@ -23,8 +23,8 @@ One row per verified edge. "Caller needs" is the identifier the interaction refe
 
 ## Containment (Not Interactions)
 
--   Flows **contain** Avonni Flow Screen Components — building both is `flow-components`' job, in one dispatch.
--   Digital Experience site views **host** Avonni (`avxp:`/`avcmpbuilder:`) components — `experience-components`' job. The site, route, and view must already exist.
+-   Flows **contain** Avonni Flow Screen Components — building both is `avonni-flow-components`' job, in one dispatch.
+-   Digital Experience site views **host** Avonni (`avxp:`/`avcmpbuilder:`) components — `avonni-experience-components`' job. The site, route, and view must already exist.
 
 ## Dependency Rules
 

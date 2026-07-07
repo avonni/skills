@@ -1,5 +1,5 @@
 ---
-name: experience-components
+name: avonni-experience-components
 description: Add, update, or remove Avonni components inside an existing Salesforce Digital Experience site. Use when the user wants to place Avonni components on a site page, when editing a site view's content.json that contains avxp: or avcmpbuilder: components, or when wiring those components to records, navigation, or styling. Does not cover creating the site, routes, themes, branding, or layouts — only the integration of Avonni components into an existing site. Do NOT use when the request spans multiple Avonni artifact types (e.g. the site page plus a flow it opens) — use the avonni-architect skill instead.
 license: MIT
 compatibility: Requires Node.js >=18, the Avonni MCP server (experience toolset), and Salesforce CLI.

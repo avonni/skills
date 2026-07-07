@@ -1,5 +1,5 @@
 ---
-name: flow-components
+name: avonni-flow-components
 description: Add, update, or remove Avonni Flow Screen Components inside a Salesforce flow. Use when the user wants Avonni components in a screen flow, when editing flow XML that contains avcmpbuilder extensions, or when creating a new screen flow built around Avonni components. Does not cover general flow logic (decisions, assignments, record operations). Do NOT use when the request spans multiple Avonni artifact types (e.g. the flow plus a dynamic component or portal page that launches it) — use the avonni-architect skill instead.
 license: MIT
 compatibility: Requires Node.js >=18, the Avonni MCP server (flow toolset), and Salesforce CLI.

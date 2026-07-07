@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = join(
     dirname(fileURLToPath(import.meta.url)),
-    '../../skills/dynamic-components/scripts/validate-component.mjs'
+    '../../skills/avonni-dynamic-components/scripts/validate-component.mjs'
 );
 
 // ---------------------------------------------------------------------------
