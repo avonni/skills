@@ -22,14 +22,16 @@
     "author": "Avonni",
     "license": "MIT",
     "engines": {
-        "node": ">=18"
+        "node": ">=20.19.0"
     },
     "bugs": {
         "url": "https://github.com/avonni/skills/issues"
     },
     "homepage": "https://github.com/avonni/skills#readme",
     "devDependencies": {
+        "@eslint/js": "^10.0.1",
         "eslint": "^10.0.0",
+        "globals": "^17.7.0",
         "prettier": "^2.6.0"
     },
     "lint-staged": {
