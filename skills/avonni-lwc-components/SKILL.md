@@ -1,5 +1,5 @@
 ---
-name: avonni-components
+name: avonni-lwc-components
 description: >
     Integrate Avonni components into the code of an LWC component (HTML, JS, CSS).
     Covers MCP tool usage, attribute/event/type/slot resolution, styling hooks, and validation — not general LWC creation.
@@ -10,15 +10,15 @@ metadata:
     version: '1.0.0'
 ---
 
-# avonni-components
+# avonni-lwc-components
 
 Use this skill whenever Avonni components need to be added to or used inside an LWC component. It governs how to discover, configure, and validate Avonni components through the MCP — not how to scaffold the surrounding LWC.
 
 ## Toolset
 
-This skill works exclusively with the **`dev` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "dev"` where applicable. Do not use this skill for Avonni Dynamic Components, Avonni Experience Sites components or for Avonni Flow Screen Components.
+This skill works exclusively with the **`lwc` toolset** of the Avonni MCP. All MCP tool calls must include `toolset: "lwc"` where applicable. Do not use this skill for Avonni Dynamic Components, Avonni Experience Sites components or for Avonni Flow Screen Components.
 
-If the Avonni MCP tools are not available in the session, stop and ask the user to configure the Avonni MCP server with the `dev` toolset. Never continue without the MCP.
+If the Avonni MCP tools are not available in the session, stop and ask the user to configure the Avonni MCP server with the `lwc` toolset. Never continue without the MCP.
 
 ## Authority
 
@@ -31,12 +31,12 @@ If the Avonni MCP tools are not available in the session, stop and ask the user 
 ## Steps
 
 1. **Understand the request** — Identify what functionality is needed and which Avonni components may be involved.
-2. **Call `list_components`** with `toolset: "dev"` — Get the current list of available components. Never skip this.
+2. **Call `list_components`** with `toolset: "lwc"` — Get the current list of available components. Never skip this.
 3. **Select components** — Choose the component(s) that best satisfy the request using the selection criteria below.
-4. **Call `get_component_docs`** with `toolset: "dev"` for each selected component — one call per component, never reuse docs across components.
+4. **Call `get_component_docs`** with `toolset: "lwc"` for each selected component — one call per component, never reuse docs across components.
 5. **Call `get_type`** for every non-primitive type referenced in attributes, events, or return values.
 6. **Resolve nested types recursively** — repeat `get_type` until all types are fully known.
-7. **Call `get_component_styles`** with `toolset: "dev"` for each component that needs styling — only if the user request involves CSS or visual customization.
+7. **Call `get_component_styles`** with `toolset: "lwc"` for each component that needs styling — only if the user request involves CSS or visual customization.
 8. **Validate** — run the checklist below before writing any code.
 9. **Generate code** — write HTML, JS, and/or CSS using only what the MCP confirmed.
 
@@ -106,7 +106,7 @@ Reuse existing component instances when possible.
 
 ## Styling Rules
 
--   To style an Avonni component, you **must** call `get_component_styles` with `toolset: "dev"` for that component first.
+-   To style an Avonni component, you **must** call `get_component_styles` with `toolset: "lwc"` for that component first.
 -   `get_component_styles` returns all CSS custom properties (styling hooks) the component exposes, along with their default values.
 -   Only use CSS variables returned by `get_component_styles` — do not invent variable names.
 -   Apply styling hooks in the component's CSS file using standard CSS custom property syntax:
@@ -122,7 +122,7 @@ avonni-some-component {
 
 ## Utility Functions
 
-The Avonni dev package exposes one utility function: **`removePageHeader`**.
+The Avonni LWC package exposes one utility function: **`removePageHeader`**.
 
 -   Call `get_util_docs` with `name: "removePageHeader"` before using it — do not rely on prior knowledge of its signature.
 -   Use it only when the user explicitly needs to hide the Salesforce page header.
