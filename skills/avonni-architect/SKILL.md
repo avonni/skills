@@ -25,12 +25,12 @@ Unlike the artifact skills, this skill is not bound to a single toolset. It may 
 
 ## Prerequisites
 
-Check these before Step 1. They enforce the requirements listed in this skill's `compatibility` frontmatter:
+These enforce the requirements listed in this skill's `compatibility` frontmatter. Check items 1 and 2 before Step 1; items 3 and 4 depend on the architecture plan and are checked during Step 2, at the point indicated below.
 
-1. **Node.js >= 18** — run `node --version`. If the command fails or the major version is below 18, stop and ask the user to install Node.js 18 or newer. Do not proceed.
-2. **Avonni MCP server** — the first MCP call of the workflow (`list_components` with the first planned toolset) doubles as the reachability check. If the Avonni MCP tools are not available in the session, or the call fails after one retry, stop and ask the user to configure the Avonni MCP server. Never continue without the MCP.
-3. **Salesforce CLI** — run `sf --version`. If it fails, do NOT stop: warn the user once that the Salesforce CLI is not installed and that some artifact skills will have reduced capabilities, then continue.
-4. **Sub-skill availability** — for each artifact skill named in the plan, verify it is available in the session's skill list. Match by exact name first; if no skill has that name, look for an available skill whose description covers building that artifact type and use it instead. If none exists, flag the artifact in the plan ("cannot be built in this session — install with `npx skills avonni/skills`") and exclude it from dispatch, together with any artifact that depends on it.
+1. **Node.js >= 18** — before Step 1, run `node --version`. If the command fails or the major version is below 18, stop and ask the user to install Node.js 18 or newer. Do not proceed.
+2. **Salesforce CLI** — before Step 1, run `sf --version`. If it fails, do NOT stop: warn the user once that the Salesforce CLI is not installed and that some artifact skills will have reduced capabilities, then continue.
+3. **Avonni MCP server** — before Step 1, verify the Avonni MCP tools are available in the session; if they are not, stop and ask the user to configure the Avonni MCP server. Reachability is confirmed by the first MCP call of the workflow (`list_components` with the first planned toolset, in Step 2): if that call fails after one retry, stop the same way. Never continue without the MCP.
+4. **Sub-skill availability** — once the plan names its artifact skills (Step 2), verify each one is available in the session's skill list. Match by exact name first; if no skill has that name, look for an available skill whose description covers building that artifact type and use it instead. If none exists, flag the artifact in the plan ("cannot be built in this session — install with `npx skills avonni/skills`") and exclude it from dispatch, together with any artifact that depends on it.
 
 ## Execution Workflow
 
