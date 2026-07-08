@@ -8,7 +8,10 @@
     - If the result was already cached, use it instead of calling the tool again.
     - Do not call `get_component_styles` for the same component twice.
 2. Identify the styling hooks or CSS properties that fit the user request.
-3. Create the inline CSS string and save it in `value.inlineStyle`. It is a string, not an object:
+3. If any selected hooks reference token categories, call `get_style_tokens` with `toolset: "dynamic"` once per styling session (not once per component):
+    - Pass only the token categories referenced by the hooks you plan to use.
+    - Skip this call if no hooks require token values.
+4. Create the inline CSS string and save it in `value.inlineStyle`. It is a string, not an object:
 
 ```json
 "value": {
@@ -49,7 +52,7 @@ The output is an inline style CSS string of `<property>: <value>;` pairs.
 Before producing final code, verify:
 
 -   Every CSS property or styling hook comes from the MCP response.
--   Every token used exists in the MCP response.
+-   Every token used exists in the `get_style_tokens` response.
 
 If any check fails, fix it before output.
 
