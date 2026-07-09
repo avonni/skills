@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = join(
     dirname(fileURLToPath(import.meta.url)),
-    '../../skills/experience-components/scripts/validate-view.mjs'
+    '../../skills/avonni-experience-components/scripts/validate-view.mjs'
 );
 
 const tempDirs = [];
@@ -29,7 +29,9 @@ function runOnContent(content) {
     const path = join(dir, `content_${fileCount++}.json`);
     writeFileSync(
         path,
-        typeof content === 'string' ? content : JSON.stringify(content, null, 2),
+        typeof content === 'string'
+            ? content
+            : JSON.stringify(content, null, 2),
         'utf8'
     );
     return runOnArgs(path);

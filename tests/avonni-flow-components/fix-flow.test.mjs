@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = join(
     dirname(fileURLToPath(import.meta.url)),
-    '../../skills/flow-components/scripts/fix-flow.mjs'
+    '../../skills/avonni-flow-components/scripts/fix-flow.mjs'
 );
 
 const tempDirs = [];
