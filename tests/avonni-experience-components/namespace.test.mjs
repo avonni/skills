@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = join(
     dirname(fileURLToPath(import.meta.url)),
-    '../../skills/experience-components/scripts/namespace.mjs'
+    '../../skills/avonni-experience-components/scripts/namespace.mjs'
 );
 
 // The org lookup shells out to the `sf` CLI. These tests stub it with a fake

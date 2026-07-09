@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT = join(
     dirname(fileURLToPath(import.meta.url)),
-    '../../skills/dynamic-components/scripts/read-component.mjs'
+    '../../skills/avonni-dynamic-components/scripts/read-component.mjs'
 );
 
 // ---------------------------------------------------------------------------
@@ -472,7 +472,7 @@ describe('Read Component XML', () => {
     describe('round-trip with validate-component', () => {
         const VALIDATE_SCRIPT = join(
             dirname(fileURLToPath(import.meta.url)),
-            '../../skills/dynamic-components/scripts/validate-component.mjs'
+            '../../skills/avonni-dynamic-components/scripts/validate-component.mjs'
         );
 
         test('output of read-component is valid input for validate-component', () => {
