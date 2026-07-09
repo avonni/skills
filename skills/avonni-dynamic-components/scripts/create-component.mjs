@@ -53,19 +53,6 @@ function escapeXmlString(s) {
 }
 
 /**
- * @param {string} name
- * @returns {boolean}
- */
-function isValidApiName(name) {
-    if (typeof name !== 'string' || name.length === 0) return false;
-    if (!/^[A-Za-z]/.test(name)) return false;
-    if (!/^[A-Za-z0-9_]+$/.test(name)) return false;
-    if (name.endsWith('_')) return false;
-    if (name.includes('__')) return false;
-    return true;
-}
-
-/**
  * @returns {string}
  */
 function nowUtc() {

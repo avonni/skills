@@ -10,6 +10,7 @@
  *   EOF
  */
 
+import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -110,7 +111,7 @@ function isValidUuidV4(value) {
 /** @param {Record<string, unknown>} obj */
 function ensureId(obj) {
     if (!isValidUuidV4(obj.id)) {
-        obj.id = crypto.randomUUID();
+        obj.id = randomUUID();
     }
 }
 

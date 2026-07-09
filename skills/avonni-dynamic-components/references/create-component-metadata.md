@@ -52,6 +52,8 @@ Before saving, check whether you are on the **Update Path** (i.e., you read an e
 
 Pipe the component JSON (generated in the previous skill step) into the save script. Do not write the JSON to a file first. The save script runs validation internally before writing the file.
 
+The save script is the **only** allowed way to produce the `.md-meta.xml` file. Never create or edit that file with any other tool (Write, Edit, shell redirection, etc.) — a hand-written file is missing the auto-generated `id` fields and audit fields, and will not work. This applies even if the script command fails or is denied: fix the problem and re-run the script, or stop and report the error to the user. Never fall back to writing the file yourself.
+
 ```bash
 node <skill_base_directory>/scripts/create-component.mjs - --version <version> [--edit] [--prev-developer-name <lastModifiedDeveloperName>] <<'EOF'
 <component JSON here, with "_passthrough" included if on the Update Path>
@@ -72,6 +74,8 @@ If the save script exits with validation errors:
 -   Read each error message carefully.
 -   Fix the component JSON.
 -   Re-run the command.
+
+If the save script fails for any other reason (command denied, Node error, etc.), stop and report the error to the user. Do not write the metadata file by hand.
 
 ## Step 4 — Remove "last modified" Flag From the Previous Version
 
