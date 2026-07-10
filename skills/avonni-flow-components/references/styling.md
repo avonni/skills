@@ -8,7 +8,10 @@
     - If the result was already cached, use it instead of calling the tool again.
     - Do not call `get_component_styles` for the same component twice.
 2. Identify the styling hooks or CSS properties that fit the user request.
-3. Write the inline CSS string into the field's `inlineStyle` input parameter. It is a plain CSS declarations string of `<property>: <value>;` pairs:
+3. If any selected hooks reference token categories, call `get_style_tokens` with `toolset: "flow"` once per styling session (not once per component):
+    - Pass only the token categories referenced by the hooks you plan to use.
+    - Skip this call if no hooks require token values.
+4. Write the inline CSS string into the field's `inlineStyle` input parameter. It is a plain CSS declarations string of `<property>: <value>;` pairs:
 
 ```xml
 <inputParameters>
@@ -47,14 +50,13 @@ For example, `--avonni-alert-{!variant}-color-background` where the component `v
 
 ## Token Preference (Mandatory)
 
-Always prefer LWC tokens over raw values. Raw values (e.g., `16px`) are only acceptable when a token does not match the required style.
+Always prefer design tokens over raw values. Raw values (e.g., `16px`) are only acceptable when a token does not match the required style.
 Use the fallback value that corresponds to the token's intended value so the style degrades gracefully if the token is unavailable.
 
 -   Correct: `var(--lwc-spacingMedium, 1rem)`
 -   Avoid: `16px`
 
-**Spacing Tokens:**
-`--lwc-spacingNone` · `--lwc-spacingXxxSmall` · `--lwc-spacingXxSmall` · `--lwc-spacingXSmall` · `--lwc-spacingSmall` · `--lwc-spacingMedium` · `--lwc-spacingLarge` · `--lwc-spacingXLarge` · `--lwc-spacingXxLarge`
+Call `get_style_tokens` with `toolset: "flow"` once per styling session to retrieve available token categories and their values. Pass the relevant `categories` to narrow down the result.
 
 ## Good Practices
 
@@ -66,7 +68,7 @@ The output is an inline style CSS string of `<property>: <value>;` pairs.
 Before producing final XML, verify:
 
 -   Every CSS property or styling hook comes from the MCP response.
--   Every token used exists in the MCP response.
+-   Every token used exists in the `get_style_tokens` response.
 
 If any check fails, fix it before output.
 
