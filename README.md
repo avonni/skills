@@ -13,7 +13,7 @@ Skills used to guide AI agents through the creation and update of Avonni compone
 ### Option 1 — npx (recommended)
 
 ```bash
-npx skills avonni/skills
+npx skills add avonni/skills
 ```
 
 This command downloads and installs the skill(s) into your current project's configuration automatically.
@@ -29,7 +29,7 @@ Once installed, describe the Avonni component you want to build. The AI will use
 
 ## Requirements
 
--   The Avonni MCP server configured in your AI assistant's settings.
+-   The Avonni MCP server configured in your AI assistant's settings (https://mcp.avonnicomponents.com/).
 -   Any AI agent that is able to execute scripts and generate files (e.g. Claude Code, Cursor, GitHub Copilot, etc.).
 -   [NodeJS](https://nodejs.org/en/download) installed.
 -   The [Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm) installed.
