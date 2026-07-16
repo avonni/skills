@@ -13,7 +13,7 @@ Skills used to guide AI agents through the creation and update of Avonni compone
 ### Option 1 — npx (recommended)
 
 ```bash
-npx skills avonni/skills
+npx skills add avonni/skills
 ```
 
 This command downloads and installs the skill(s) into your current project's configuration automatically.
