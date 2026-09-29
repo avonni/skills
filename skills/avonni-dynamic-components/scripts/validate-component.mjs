@@ -442,7 +442,9 @@ function validateDcAccordionSection(comp, cpath, parentComponentName) {
 // dcLayout
 
 const AVONNI_LAYOUT_ITEM_NAME = 'avonniLayoutItem';
-const AVONNI_LAYOUT_ITEM_API_NAME_RE = /^avonniLayoutItem(\d+)$/;
+// Case sensitive: the builder recognizes columns by this apiName prefix.
+const AVONNI_LAYOUT_ITEM_API_NAME_PREFIX = 'AvonniLayoutItem';
+const AVONNI_LAYOUT_ITEM_API_NAME_RE = /^AvonniLayoutItem(\d+)$/;
 
 /**
  * @param {Record<string, unknown>} comp
@@ -473,7 +475,7 @@ function validateDcLayout(comp, cpath, _parentComponentName) {
             if (!match) {
                 error(
                     `${cpath}.content[${i}].apiName "${c.apiName}": must follow pattern ` +
-                        `${AVONNI_LAYOUT_ITEM_NAME}{columnNumber} (e.g., ${AVONNI_LAYOUT_ITEM_NAME}1)`
+                        `${AVONNI_LAYOUT_ITEM_API_NAME_PREFIX}{columnNumber} (e.g., ${AVONNI_LAYOUT_ITEM_API_NAME_PREFIX}1)`
                 );
             } else {
                 numbers.push(parseInt(match[1], 10));
@@ -486,10 +488,10 @@ function validateDcLayout(comp, cpath, _parentComponentName) {
         if (numbers[i] !== i + 1) {
             error(
                 `${cpath} (dcLayout): ${AVONNI_LAYOUT_ITEM_NAME} apiName numbering must be sequential ` +
-                    `starting at 1 — expected ${AVONNI_LAYOUT_ITEM_NAME}${
+                    `starting at 1 — expected ${AVONNI_LAYOUT_ITEM_API_NAME_PREFIX}${
                         i + 1
                     } at position ${i}, ` +
-                    `found ${AVONNI_LAYOUT_ITEM_NAME}${numbers[i]}`
+                    `found ${AVONNI_LAYOUT_ITEM_API_NAME_PREFIX}${numbers[i]}`
             );
         }
     }

@@ -504,8 +504,8 @@ describe('Validate Component JSON', () => {
         test('valid dcLayout with sequential avonniLayoutItems passes', () => {
             pass(
                 layoutWithItems([
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem1'),
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem2')
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem1'),
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem2')
                 ])
             );
         });
@@ -520,15 +520,24 @@ describe('Validate Component JSON', () => {
         test('avonniLayoutItem apiName not matching pattern', () => {
             fail(
                 layoutWithItems([baseComp('avonniLayoutItem', 'wrongName1')]),
-                'must follow pattern avonniLayoutItem{columnNumber}'
+                'must follow pattern AvonniLayoutItem{columnNumber}'
+            );
+        });
+
+        test('lowercase avonniLayoutItem apiName is rejected', () => {
+            fail(
+                layoutWithItems([
+                    baseComp('avonniLayoutItem', 'avonniLayoutItem1')
+                ]),
+                'must follow pattern AvonniLayoutItem{columnNumber}'
             );
         });
 
         test('avonniLayoutItem numbering not sequential', () => {
             fail(
                 layoutWithItems([
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem1'),
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem3')
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem1'),
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem3')
                 ]),
                 'numbering must be sequential starting at 1'
             );
@@ -537,7 +546,7 @@ describe('Validate Component JSON', () => {
         test('avonniLayoutItem numbering not starting at 1', () => {
             fail(
                 layoutWithItems([
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem2')
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem2')
                 ]),
                 'numbering must be sequential starting at 1'
             );
@@ -548,7 +557,7 @@ describe('Validate Component JSON', () => {
         test('avonniLayoutItem outside dcLayout', () => {
             fail(
                 withComponent(
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem1')
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem1')
                 ),
                 'must be placed inside a dcLayout slot'
             );
