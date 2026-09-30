@@ -504,8 +504,8 @@ describe('Validate Component JSON', () => {
         test('valid dcLayout with sequential avonniLayoutItems passes', () => {
             pass(
                 layoutWithItems([
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem1'),
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem2')
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem1'),
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem2')
                 ])
             );
         });
@@ -520,26 +520,95 @@ describe('Validate Component JSON', () => {
         test('avonniLayoutItem apiName not matching pattern', () => {
             fail(
                 layoutWithItems([baseComp('avonniLayoutItem', 'wrongName1')]),
-                'must follow pattern avonniLayoutItem{columnNumber}'
+                'must follow pattern AvonniLayoutItem{columnNumber}'
             );
         });
 
-        test('avonniLayoutItem numbering not sequential', () => {
+        test('lowercase avonniLayoutItem apiName is rejected', () => {
             fail(
                 layoutWithItems([
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem1'),
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem3')
+                    baseComp('avonniLayoutItem', 'avonniLayoutItem1')
                 ]),
-                'numbering must be sequential starting at 1'
+                'must follow pattern AvonniLayoutItem{columnNumber}'
             );
         });
 
-        test('avonniLayoutItem numbering not starting at 1', () => {
+        test('two dcLayouts continuing the column numbering pass', () => {
+            pass(
+                minimal({
+                    value: [
+                        {
+                            ...baseComp('dcLayout', 'Layout1'),
+                            slots: [
+                                {
+                                    name: 'content',
+                                    components: [
+                                        baseComp(
+                                            'avonniLayoutItem',
+                                            'AvonniLayoutItem1'
+                                        ),
+                                        baseComp(
+                                            'avonniLayoutItem',
+                                            'AvonniLayoutItem2'
+                                        )
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            ...baseComp('dcLayout', 'Layout2'),
+                            slots: [
+                                {
+                                    name: 'content',
+                                    components: [
+                                        baseComp(
+                                            'avonniLayoutItem',
+                                            'AvonniLayoutItem3'
+                                        )
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                })
+            );
+        });
+
+        test('same column apiName in two dcLayouts is rejected', () => {
             fail(
-                layoutWithItems([
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem2')
-                ]),
-                'numbering must be sequential starting at 1'
+                minimal({
+                    value: [
+                        {
+                            ...baseComp('dcLayout', 'Layout1'),
+                            slots: [
+                                {
+                                    name: 'content',
+                                    components: [
+                                        baseComp(
+                                            'avonniLayoutItem',
+                                            'AvonniLayoutItem1'
+                                        )
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            ...baseComp('dcLayout', 'Layout2'),
+                            slots: [
+                                {
+                                    name: 'content',
+                                    components: [
+                                        baseComp(
+                                            'avonniLayoutItem',
+                                            'AvonniLayoutItem1'
+                                        )
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }),
+                'Duplicate component apiName: "AvonniLayoutItem1"'
             );
         });
     });
@@ -548,7 +617,7 @@ describe('Validate Component JSON', () => {
         test('avonniLayoutItem outside dcLayout', () => {
             fail(
                 withComponent(
-                    baseComp('avonniLayoutItem', 'avonniLayoutItem1')
+                    baseComp('avonniLayoutItem', 'AvonniLayoutItem1')
                 ),
                 'must be placed inside a dcLayout slot'
             );

@@ -442,7 +442,9 @@ function validateDcAccordionSection(comp, cpath, parentComponentName) {
 // dcLayout
 
 const AVONNI_LAYOUT_ITEM_NAME = 'avonniLayoutItem';
-const AVONNI_LAYOUT_ITEM_API_NAME_RE = /^avonniLayoutItem(\d+)$/;
+// Case sensitive: the builder recognizes columns by this apiName prefix.
+const AVONNI_LAYOUT_ITEM_API_NAME_PREFIX = 'AvonniLayoutItem';
+const AVONNI_LAYOUT_ITEM_API_NAME_RE = /^AvonniLayoutItem\d+$/;
 
 /**
  * @param {Record<string, unknown>} comp
@@ -453,7 +455,6 @@ function validateDcLayout(comp, cpath, _parentComponentName) {
     const contentSlot = getSlot(comp, 'content');
     if (!contentSlot || !Array.isArray(contentSlot.components)) return;
 
-    const numbers = [];
     for (let i = 0; i < contentSlot.components.length; i++) {
         const child = contentSlot.components[i];
         if (!child || typeof child !== 'object' || Array.isArray(child))
@@ -468,28 +469,14 @@ function validateDcLayout(comp, cpath, _parentComponentName) {
             continue;
         }
 
-        if (typeof c.apiName === 'string') {
-            const match = AVONNI_LAYOUT_ITEM_API_NAME_RE.exec(c.apiName);
-            if (!match) {
-                error(
-                    `${cpath}.content[${i}].apiName "${c.apiName}": must follow pattern ` +
-                        `${AVONNI_LAYOUT_ITEM_NAME}{columnNumber} (e.g., ${AVONNI_LAYOUT_ITEM_NAME}1)`
-                );
-            } else {
-                numbers.push(parseInt(match[1], 10));
-            }
-        }
-    }
-
-    // Sequential numbering starting at 1, global across the dcLayout instance
-    for (let i = 0; i < numbers.length; i++) {
-        if (numbers[i] !== i + 1) {
+        // Uniqueness across the whole component is checked by collectComponentApiNames.
+        if (
+            typeof c.apiName === 'string' &&
+            !AVONNI_LAYOUT_ITEM_API_NAME_RE.test(c.apiName)
+        ) {
             error(
-                `${cpath} (dcLayout): ${AVONNI_LAYOUT_ITEM_NAME} apiName numbering must be sequential ` +
-                    `starting at 1 — expected ${AVONNI_LAYOUT_ITEM_NAME}${
-                        i + 1
-                    } at position ${i}, ` +
-                    `found ${AVONNI_LAYOUT_ITEM_NAME}${numbers[i]}`
+                `${cpath}.content[${i}].apiName "${c.apiName}": must follow pattern ` +
+                    `${AVONNI_LAYOUT_ITEM_API_NAME_PREFIX}{columnNumber} (e.g., ${AVONNI_LAYOUT_ITEM_API_NAME_PREFIX}1)`
             );
         }
     }
