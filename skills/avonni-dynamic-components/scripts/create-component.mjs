@@ -22,6 +22,8 @@
  *
  * Pass --edit when updating an existing version in place (preserves CreatedByName__c).
  *
+ * Each query-bound component gets a queryFields list in Value__c (see addQueryFields).
+ *
  * All other fields in _passthrough are written verbatim, preserving their xsi:type.
  * This means any field added to the object in the future is automatically preserved
  * on update without any script changes.
@@ -126,6 +128,64 @@ const MANAGED_FIELDS = new Set(
         'VersionNumber__c'
     ].map(addNamespace)
 );
+
+/**
+ * Saves on each query-bound component the fields its first query needs, as the
+ * Component Builder does. Without them, the runtime's first query selects only Id
+ * and the order by fields, so mapped fields render empty until the component
+ * publishes its own list and the query runs again.
+ * Applies the generic rule (Id, the {{Record.X}} fields of itemsSObjectMapping and
+ * additionalQueryFields) and keeps any queryFields already present, so fields a
+ * component derives otherwise (e.g. Datatable columns) survive an edit.
+ * Skips Pivot Tables: their queryFields are GROUP BY CUBE expressions, which Id
+ * would break, and they always publish their own.
+ * @param {unknown[]} components
+ */
+function addQueryFields(components) {
+    if (!Array.isArray(components)) return;
+    for (const comp of components) {
+        if (!comp || typeof comp !== 'object' || Array.isArray(comp)) continue;
+        const c = /** @type {Record<string, unknown>} */ (comp);
+        const value = /** @type {Record<string, unknown>} */ (c.value);
+        if (
+            value &&
+            typeof value === 'object' &&
+            value.itemsTypeSelected === 'query' &&
+            c.name !== 'dcPivotTable'
+        ) {
+            const mapping = JSON.stringify(value.itemsSObjectMapping ?? {});
+            const mappedFields = Array.from(
+                mapping.matchAll(/{{Record\.([^{}]+)}}/g),
+                ([, field]) => field
+            );
+            const savedFields = Array.isArray(value.queryFields)
+                ? value.queryFields
+                : [];
+            const additionalFields = Array.isArray(value.additionalQueryFields)
+                ? value.additionalQueryFields
+                : [];
+            value.queryFields = Array.from(
+                new Set([
+                    'Id',
+                    ...savedFields,
+                    ...mappedFields,
+                    ...additionalFields
+                ])
+            );
+        }
+        if (Array.isArray(c.slots)) {
+            for (const slot of c.slots) {
+                if (
+                    slot &&
+                    typeof slot === 'object' &&
+                    Array.isArray(slot.components)
+                ) {
+                    addQueryFields(slot.components);
+                }
+            }
+        }
+    }
+}
 
 /**
  * Fetches the current Salesforce user's full name via the SF CLI.
@@ -464,6 +524,8 @@ function main() {
         process.exit(1);
     }
     process.stderr.write('Validation passed.\n');
+
+    addQueryFields(/** @type {Record<string, unknown>} */ (data).value);
 
     const currentUserName = fetchCurrentUserName();
     if (!currentUserName) {
