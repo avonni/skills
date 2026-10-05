@@ -146,15 +146,71 @@ function toArray(value) {
     }
 }
 
+// Keys holding field API names, wherever they appear in itemsSObjectMapping or in
+// columns: chart series, datatable and tree grid columns, kanban card and
+// summarize fields, the fields displayed by lists, maps, timelines, etc.
+const MAPPING_FIELD_KEYS = new Set([
+    'customFields',
+    'field',
+    'fieldName',
+    'fields',
+    'keyField'
+]);
+
+// Component properties holding field API names.
+const FIELD_PROPERTIES = [
+    'exportToFields',
+    'fields',
+    'groupByFieldApiName',
+    'keyField',
+    'additionalQueryFields'
+];
+
+// Records a component exposes to its slots, e.g. {!Repeatable1.CurrentRecord.Name}.
+const SLOT_RECORD_REFERENCES = ['CurrentRecord', 'detailPopoverEventSObject'];
+
+/**
+ * Reads a property holding one field name or a list of them.
+ * @param {unknown} value
+ * @returns {string[]}
+ */
+function toFieldNames(value) {
+    const names =
+        typeof value === 'string' && !value.startsWith('[')
+            ? [value]
+            : toArray(value);
+    return names.filter((name) => typeof name === 'string' && name !== '');
+}
+
+/**
+ * Adds to fields the values of the MAPPING_FIELD_KEYS found at any depth of node.
+ * @param {unknown} node
+ * @param {Set<string>} fields
+ */
+function collectMappingFields(node, fields) {
+    if (!node || typeof node !== 'object') return;
+    for (const [key, child] of Object.entries(node)) {
+        if (MAPPING_FIELD_KEYS.has(key)) {
+            toFieldNames(child).forEach((field) => fields.add(field));
+        } else {
+            collectMappingFields(child, fields);
+        }
+    }
+}
+
 /**
  * Saves on each query-bound component the fields its first query needs, as the
  * Component Builder does. Without them, the runtime's first query selects only Id
  * and the order by fields, so mapped fields render empty until the component
  * publishes its own list and the query runs again.
- * Adds Id, the {{Record.X}} fields of itemsSObjectMapping and of the interactions
- * (evt* properties), the itemsSObjectMapping.fields list of displayed fields and
- * additionalQueryFields. Keeps any queryFields already present,
- * so fields a component derives otherwise (e.g. Datatable columns) survive an edit.
+ * Adds, without relying on the component name:
+ * - Id (DurableId for FieldDefinition);
+ * - the {{Record.X}} fields of itemsSObjectMapping and of the interactions;
+ * - the MAPPING_FIELD_KEYS of itemsSObjectMapping and columns;
+ * - the FIELD_PROPERTIES of the component;
+ * - the fields its slots read through SLOT_RECORD_REFERENCES.
+ * Keeps any queryFields already present, so the fields a component derives
+ * otherwise survive an edit. The runtime drops the fields the object lacks.
  * Skips Pivot Tables: their queryFields are GROUP BY CUBE expressions, which Id
  * would break, and they always publish their own.
  * @param {unknown[]} components
@@ -171,29 +227,51 @@ function addQueryFields(components) {
             value.itemsTypeSelected === 'query' &&
             c.name !== 'dcPivotTable'
         ) {
-            const mapping = /** @type {Record<string, unknown>} */ (
-                value.itemsSObjectMapping ?? {}
-            );
+            const fields = new Set([
+                value.itemsSObjectApiName === 'FieldDefinition'
+                    ? 'DurableId'
+                    : 'Id',
+                ...toFieldNames(value.queryFields)
+            ]);
+
             const interactions = Object.keys(value)
                 .filter((key) => key.startsWith('evt'))
                 .map((key) => value[key]);
-            const templates = JSON.stringify([mapping, interactions]);
-            const templateFields = Array.from(
-                templates.matchAll(/{{Record\.([^{}]+)}}/g),
-                ([, field]) => field
+            const templates = JSON.stringify([
+                value.itemsSObjectMapping ?? {},
+                interactions
+            ]);
+            for (const [, field] of templates.matchAll(
+                /{{Record\.([^{}]+)}}/g
+            )) {
+                fields.add(field);
+            }
+
+            collectMappingFields(value.itemsSObjectMapping, fields);
+            collectMappingFields(value.columns, fields);
+
+            const apiName = String(c.apiName ?? '').replace(
+                /[.*+?^${}()|[\]\\]/g,
+                '\\$&'
             );
-            const displayedFields = toArray(mapping.fields).filter(
-                (field) => typeof field === 'string' && field
+            const records = SLOT_RECORD_REFERENCES.join('|');
+            const slotReference = new RegExp(
+                `\\{!${apiName}\\.(?:${records})\\.([\\w.]+)\\}`,
+                'g'
             );
-            value.queryFields = Array.from(
-                new Set([
-                    'Id',
-                    ...toArray(value.queryFields),
-                    ...templateFields,
-                    ...displayedFields,
-                    ...toArray(value.additionalQueryFields)
-                ])
-            );
+            for (const [, field] of JSON.stringify(c.slots ?? []).matchAll(
+                slotReference
+            )) {
+                fields.add(field);
+            }
+
+            for (const property of FIELD_PROPERTIES) {
+                toFieldNames(value[property]).forEach((field) =>
+                    fields.add(field)
+                );
+            }
+
+            value.queryFields = Array.from(fields);
         }
         if (Array.isArray(c.slots)) {
             for (const slot of c.slots) {
