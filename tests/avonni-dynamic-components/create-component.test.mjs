@@ -579,6 +579,63 @@ describe('Create Component XML', () => {
             ]);
         });
 
+        test('fields used in interactions are added', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [
+                    queryList('List1', {
+                        evtItemClick: [
+                            {
+                                type: 'navigateToRecord',
+                                recordId: '{{Record.OwnerId}}'
+                            }
+                        ]
+                    })
+                ]
+            });
+            assert.deepEqual(writtenValue(xml)[0].value.queryFields, [
+                'Id',
+                'Name',
+                'BillingCity',
+                'Industry',
+                'OwnerId'
+            ]);
+        });
+
+        test('fields displayed through the mapping fields list are added', () => {
+            const list = queryList('List1');
+            list.value.itemsSObjectMapping.fields = ['Phone', 'Website'];
+            const map = {
+                name: 'dcMap',
+                apiName: 'Map1',
+                value: {
+                    itemsTypeSelected: 'query',
+                    itemsSObject: '{!$Query.getAccounts}',
+                    itemsSObjectApiName: 'Account',
+                    itemsSObjectMapping: { fields: '["BillingStreet"]' }
+                }
+            };
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [list, map]
+            });
+            const [writtenList, writtenMap] = writtenValue(xml);
+            assert.deepEqual(writtenList.value.queryFields, [
+                'Id',
+                'Name',
+                'BillingCity',
+                'Industry',
+                'Phone',
+                'Website'
+            ]);
+            assert.deepEqual(writtenMap.value.queryFields, [
+                'Id',
+                'BillingStreet'
+            ]);
+        });
+
         test('pivot table keeps its saved query fields untouched', () => {
             const savedFields = [
                 'Industry',

@@ -129,14 +129,40 @@ const MANAGED_FIELDS = new Set(
     ].map(addNamespace)
 );
 
+// Components whose itemsSObjectMapping.fields lists the fields they display.
+const MAPPING_FIELDS_COMPONENTS = new Set([
+    'dcActivityTimeline',
+    'dcList',
+    'dcMap',
+    'dcVisualPicker'
+]);
+
+/**
+ * Reads an array property the way the runtime does: as an array, or as a JSON
+ * string holding one.
+ * @param {unknown} value
+ * @returns {unknown[]}
+ */
+function toArray(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value !== 'string' || !value) return [];
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
 /**
  * Saves on each query-bound component the fields its first query needs, as the
  * Component Builder does. Without them, the runtime's first query selects only Id
  * and the order by fields, so mapped fields render empty until the component
  * publishes its own list and the query runs again.
- * Applies the generic rule (Id, the {{Record.X}} fields of itemsSObjectMapping and
- * additionalQueryFields) and keeps any queryFields already present, so fields a
- * component derives otherwise (e.g. Datatable columns) survive an edit.
+ * Adds Id, the {{Record.X}} fields of itemsSObjectMapping and of the interactions
+ * (evt* properties), the itemsSObjectMapping.fields list of the components that
+ * display it, and additionalQueryFields. Keeps any queryFields already present,
+ * so fields a component derives otherwise (e.g. Datatable columns) survive an edit.
  * Skips Pivot Tables: their queryFields are GROUP BY CUBE expressions, which Id
  * would break, and they always publish their own.
  * @param {unknown[]} components
@@ -153,23 +179,31 @@ function addQueryFields(components) {
             value.itemsTypeSelected === 'query' &&
             c.name !== 'dcPivotTable'
         ) {
-            const mapping = JSON.stringify(value.itemsSObjectMapping ?? {});
-            const mappedFields = Array.from(
-                mapping.matchAll(/{{Record\.([^{}]+)}}/g),
+            const mapping = /** @type {Record<string, unknown>} */ (
+                value.itemsSObjectMapping ?? {}
+            );
+            const interactions = Object.keys(value)
+                .filter((key) => key.startsWith('evt'))
+                .map((key) => value[key]);
+            const templates = JSON.stringify([mapping, interactions]);
+            const templateFields = Array.from(
+                templates.matchAll(/{{Record\.([^{}]+)}}/g),
                 ([, field]) => field
             );
-            const savedFields = Array.isArray(value.queryFields)
-                ? value.queryFields
-                : [];
-            const additionalFields = Array.isArray(value.additionalQueryFields)
-                ? value.additionalQueryFields
+            const displayedFields = MAPPING_FIELDS_COMPONENTS.has(
+                /** @type {string} */ (c.name)
+            )
+                ? toArray(mapping.fields).filter(
+                      (field) => typeof field === 'string' && field
+                  )
                 : [];
             value.queryFields = Array.from(
                 new Set([
                     'Id',
-                    ...savedFields,
-                    ...mappedFields,
-                    ...additionalFields
+                    ...toArray(value.queryFields),
+                    ...templateFields,
+                    ...displayedFields,
+                    ...toArray(value.additionalQueryFields)
                 ])
             );
         }
