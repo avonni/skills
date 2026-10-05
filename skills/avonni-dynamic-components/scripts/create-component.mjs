@@ -227,12 +227,15 @@ function addQueryFields(components) {
             value.itemsTypeSelected === 'query' &&
             c.name !== 'dcPivotTable'
         ) {
-            const fields = new Set([
+            const idField =
                 value.itemsSObjectApiName === 'FieldDefinition'
                     ? 'DurableId'
-                    : 'Id',
-                ...toFieldNames(value.queryFields)
-            ]);
+                    : 'Id';
+            // FieldDefinition is keyed by DurableId: drop a saved Id.
+            const savedFields = toFieldNames(value.queryFields).filter(
+                (field) => field !== 'Id' || idField === 'Id'
+            );
+            const fields = new Set([idField, ...savedFields]);
 
             const interactions = Object.keys(value)
                 .filter((key) => key.startsWith('evt'))

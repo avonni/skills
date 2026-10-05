@@ -759,7 +759,7 @@ describe('Create Component XML', () => {
             ]);
         });
 
-        test('FieldDefinition queries use DurableId', () => {
+        test('FieldDefinition queries use DurableId instead of Id', () => {
             const { xml } = pass({
                 ...MINIMAL,
                 queries: [
@@ -769,12 +769,14 @@ describe('Create Component XML', () => {
                     queryComponent('dcList', 'List1', {
                         itemsSObject: '{!$Query.getFields}',
                         itemsSObjectApiName: 'FieldDefinition',
-                        itemsSObjectMapping: { label: '{{Record.Label}}' }
+                        itemsSObjectMapping: { label: '{{Record.Label}}' },
+                        queryFields: ['Id', 'DataType']
                     })
                 ]
             });
             assert.deepEqual(writtenValue(xml)[0].value.queryFields, [
                 'DurableId',
+                'DataType',
                 'Label'
             ]);
         });
