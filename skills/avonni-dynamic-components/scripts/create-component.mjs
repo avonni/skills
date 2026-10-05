@@ -129,14 +129,6 @@ const MANAGED_FIELDS = new Set(
     ].map(addNamespace)
 );
 
-// Components whose itemsSObjectMapping.fields lists the fields they display.
-const MAPPING_FIELDS_COMPONENTS = new Set([
-    'dcActivityTimeline',
-    'dcList',
-    'dcMap',
-    'dcVisualPicker'
-]);
-
 /**
  * Reads an array property the way the runtime does: as an array, or as a JSON
  * string holding one.
@@ -160,8 +152,8 @@ function toArray(value) {
  * and the order by fields, so mapped fields render empty until the component
  * publishes its own list and the query runs again.
  * Adds Id, the {{Record.X}} fields of itemsSObjectMapping and of the interactions
- * (evt* properties), the itemsSObjectMapping.fields list of the components that
- * display it, and additionalQueryFields. Keeps any queryFields already present,
+ * (evt* properties), the itemsSObjectMapping.fields list of displayed fields and
+ * additionalQueryFields. Keeps any queryFields already present,
  * so fields a component derives otherwise (e.g. Datatable columns) survive an edit.
  * Skips Pivot Tables: their queryFields are GROUP BY CUBE expressions, which Id
  * would break, and they always publish their own.
@@ -190,13 +182,9 @@ function addQueryFields(components) {
                 templates.matchAll(/{{Record\.([^{}]+)}}/g),
                 ([, field]) => field
             );
-            const displayedFields = MAPPING_FIELDS_COMPONENTS.has(
-                /** @type {string} */ (c.name)
-            )
-                ? toArray(mapping.fields).filter(
-                      (field) => typeof field === 'string' && field
-                  )
-                : [];
+            const displayedFields = toArray(mapping.fields).filter(
+                (field) => typeof field === 'string' && field
+            );
             value.queryFields = Array.from(
                 new Set([
                     'Id',
