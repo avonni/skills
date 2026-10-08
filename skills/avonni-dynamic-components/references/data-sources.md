@@ -191,3 +191,5 @@ Use when items come from a query result.
 | `itemsSObjectApiName` | yes      | Must equal the `objectApiName` of the referenced query                                                                                                                                    |
 | `nbItems`             | yes      | `"{!$Query.<apiName>.nbItems}"` — the query result count                                                                                                                                  |
 | `itemsSObjectMapping` | yes      | Maps each component item key to its value. Each key accepts a static value (`"standard:account"`), a record field (`"{{Record.Name}}"`), or a mix (`"Located in {{Record.BillingCity}}"`) |
+
+Never set `queryFields` yourself: `create-component.mjs` fills it with the fields the component reads (mapping, interactions, columns, etc.) when it writes the metadata. When editing, leave existing `queryFields` as they are.

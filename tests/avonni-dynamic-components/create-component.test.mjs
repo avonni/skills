@@ -481,4 +481,352 @@ describe('Create Component XML', () => {
             assert.ok(xml.includes('&gt;'));
         });
     });
+
+    // ---------------------------------------------------------------------------
+    // Query fields
+    // ---------------------------------------------------------------------------
+
+    describe('query fields', () => {
+        const QUERIES = [{ apiName: 'getAccounts', objectApiName: 'Account' }];
+
+        function queryList(apiName, valueOverrides = {}) {
+            return {
+                name: 'dcList',
+                apiName,
+                value: {
+                    itemsTypeSelected: 'query',
+                    itemsSObject: '{!$Query.getAccounts}',
+                    itemsSObjectApiName: 'Account',
+                    itemsSObjectMapping: {
+                        label: '{{Record.Name}}',
+                        description:
+                            '{{Record.BillingCity}} · {{Record.Industry}}'
+                    },
+                    ...valueOverrides
+                }
+            };
+        }
+
+        function writtenValue(xml) {
+            const match = xml.match(
+                /<field>avxp__Value__c<\/field>\s*<value[^>]*>([\s\S]*?)<\/value>/
+            );
+            return JSON.parse(
+                match[1]
+                    .replace(/&quot;/g, '"')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&')
+            );
+        }
+
+        test('query component gets Id and its mapped fields', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [queryList('List1')]
+            });
+            assert.deepEqual(writtenValue(xml)[0].value.queryFields, [
+                'Id',
+                'Name',
+                'BillingCity',
+                'Industry'
+            ]);
+        });
+
+        test('saved and additional query fields are kept', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [
+                    queryList('List1', {
+                        additionalQueryFields: ['OwnerId'],
+                        queryFields: ['Id', 'Type']
+                    })
+                ]
+            });
+            assert.deepEqual(writtenValue(xml)[0].value.queryFields, [
+                'Id',
+                'Type',
+                'Name',
+                'BillingCity',
+                'Industry',
+                'OwnerId'
+            ]);
+        });
+
+        test('query component inside a slot gets its query fields', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [
+                    {
+                        name: 'dcCard',
+                        apiName: 'Card1',
+                        value: {},
+                        slots: [
+                            { name: 'body', components: [queryList('List1')] }
+                        ]
+                    }
+                ]
+            });
+            const list = writtenValue(xml)[0].slots[0].components[0];
+            assert.deepEqual(list.value.queryFields, [
+                'Id',
+                'Name',
+                'BillingCity',
+                'Industry'
+            ]);
+        });
+
+        test('fields used in interactions are added', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [
+                    queryList('List1', {
+                        evtItemClick: [
+                            {
+                                type: 'navigateToRecord',
+                                recordId: '{{Record.OwnerId}}'
+                            }
+                        ]
+                    })
+                ]
+            });
+            assert.deepEqual(writtenValue(xml)[0].value.queryFields, [
+                'Id',
+                'Name',
+                'BillingCity',
+                'Industry',
+                'OwnerId'
+            ]);
+        });
+
+        test('fields displayed through the mapping fields list are added', () => {
+            const list = queryList('List1');
+            list.value.itemsSObjectMapping.fields = ['Phone', 'Website'];
+            const map = {
+                name: 'dcMap',
+                apiName: 'Map1',
+                value: {
+                    itemsTypeSelected: 'query',
+                    itemsSObject: '{!$Query.getAccounts}',
+                    itemsSObjectApiName: 'Account',
+                    itemsSObjectMapping: { fields: '["BillingStreet"]' }
+                }
+            };
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [list, map]
+            });
+            const [writtenList, writtenMap] = writtenValue(xml);
+            assert.deepEqual(writtenList.value.queryFields, [
+                'Id',
+                'Name',
+                'BillingCity',
+                'Industry',
+                'Phone',
+                'Website'
+            ]);
+            assert.deepEqual(writtenMap.value.queryFields, [
+                'Id',
+                'BillingStreet'
+            ]);
+        });
+
+        function queryComponent(name, apiName, valueOverrides = {}) {
+            return {
+                name,
+                apiName,
+                value: {
+                    itemsTypeSelected: 'query',
+                    itemsSObject: '{!$Query.getAccounts}',
+                    itemsSObjectApiName: 'Account',
+                    ...valueOverrides
+                }
+            };
+        }
+
+        test('fields named in the mapping and columns are added', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [
+                    queryComponent('dcChart', 'Chart1', {
+                        itemsSObjectMapping: {
+                            bars: [{ field: 'Industry' }],
+                            barLength: [{ field: 'AnnualRevenue' }]
+                        }
+                    }),
+                    queryComponent('dcDatatable', 'Datatable1', {
+                        itemsSObjectMapping: [
+                            {
+                                fieldName: 'Name',
+                                typeAttributes: { label: { fieldName: 'Site' } }
+                            }
+                        ]
+                    }),
+                    queryComponent('dcKanban', 'Kanban1', {
+                        itemsSObjectMapping: {
+                            cardAttributes: { customFields: ['Phone'] },
+                            summarizeAttributes: {
+                                fieldName: 'NumberOfEmployees'
+                            }
+                        }
+                    }),
+                    queryComponent('dcTreeGrid', 'TreeGrid1', {
+                        columns: [{ fieldName: 'Rating' }]
+                    })
+                ]
+            });
+            const fields = writtenValue(xml).map((c) => c.value.queryFields);
+            assert.deepEqual(fields, [
+                ['Id', 'Industry', 'AnnualRevenue'],
+                ['Id', 'Name', 'Site'],
+                ['Id', 'Phone', 'NumberOfEmployees'],
+                ['Id', 'Rating']
+            ]);
+        });
+
+        test('field properties of the component are added', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [
+                    queryComponent('dcDatatable', 'Datatable1', {
+                        groupByFieldApiName: 'Industry',
+                        exportToFields: ['Name', 'Phone']
+                    }),
+                    queryComponent('dcDataLwcContainer', 'DataLwc1', {
+                        keyField: 'AccountNumber',
+                        fields: ['Name', 'Website']
+                    })
+                ]
+            });
+            const fields = writtenValue(xml).map((c) => c.value.queryFields);
+            assert.deepEqual(fields, [
+                ['Id', 'Name', 'Phone', 'Industry'],
+                ['Id', 'Name', 'Website', 'AccountNumber']
+            ]);
+        });
+
+        test('fields read by the slots through the component record are added', () => {
+            const text = (apiName, value) => ({
+                name: 'dcText',
+                apiName,
+                value: { value }
+            });
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [
+                    {
+                        ...queryComponent('dcRepeatable', 'Repeatable1'),
+                        slots: [
+                            {
+                                name: 'content',
+                                components: [
+                                    text(
+                                        'Text1',
+                                        '{!Repeatable1.CurrentRecord.Name}'
+                                    )
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        ...queryComponent('dcScheduler', 'Scheduler1'),
+                        slots: [
+                            {
+                                name: 'event-detail-popover',
+                                components: [
+                                    text(
+                                        'Text2',
+                                        '{!Scheduler1.detailPopoverEventSObject.Owner.Name}'
+                                    )
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            });
+            const fields = writtenValue(xml).map((c) => c.value.queryFields);
+            assert.deepEqual(fields, [
+                ['Id', 'Name'],
+                ['Id', 'Owner.Name']
+            ]);
+        });
+
+        test('FieldDefinition queries use DurableId instead of Id', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: [
+                    { apiName: 'getFields', objectApiName: 'FieldDefinition' }
+                ],
+                value: [
+                    queryComponent('dcList', 'List1', {
+                        itemsSObject: '{!$Query.getFields}',
+                        itemsSObjectApiName: 'FieldDefinition',
+                        itemsSObjectMapping: { label: '{{Record.Label}}' },
+                        queryFields: ['Id', 'DataType']
+                    })
+                ]
+            });
+            assert.deepEqual(writtenValue(xml)[0].value.queryFields, [
+                'DurableId',
+                'DataType',
+                'Label'
+            ]);
+        });
+
+        test('pivot table keeps its saved query fields untouched', () => {
+            const savedFields = [
+                'Industry',
+                'GROUPING(Industry)',
+                'SUM(AnnualRevenue)'
+            ];
+            const { xml } = pass({
+                ...MINIMAL,
+                queries: QUERIES,
+                value: [
+                    {
+                        name: 'dcPivotTable',
+                        apiName: 'PivotTable1',
+                        value: {
+                            itemsTypeSelected: 'query',
+                            itemsSObject: '{!$Query.getAccounts}',
+                            itemsSObjectApiName: 'Account',
+                            itemsSObjectMapping: {
+                                groupRows: [{ field: 'Industry' }],
+                                aggregations: [
+                                    { field: 'AnnualRevenue', function: 'SUM' }
+                                ]
+                            },
+                            queryFields: savedFields
+                        }
+                    }
+                ]
+            });
+            assert.deepEqual(
+                writtenValue(xml)[0].value.queryFields,
+                savedFields
+            );
+        });
+
+        test('component without a query data source gets no query fields', () => {
+            const { xml } = pass({
+                ...MINIMAL,
+                value: [
+                    {
+                        name: 'dcList',
+                        apiName: 'List1',
+                        value: { itemsTypeSelected: 'static', items: [] }
+                    }
+                ]
+            });
+            assert.equal('queryFields' in writtenValue(xml)[0].value, false);
+        });
+    });
 });
