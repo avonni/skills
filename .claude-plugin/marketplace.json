@@ -1,0 +1,12 @@
+{
+    "name": "avonni",
+    "owner": { "name": "Avonni" },
+    "metadata": { "description": "Official Avonni plugins for AI agents." },
+    "plugins": [
+        {
+            "name": "avonni",
+            "source": "./",
+            "description": "Avonni skills and MCP server to create and update Avonni components."
+        }
+    ]
+}

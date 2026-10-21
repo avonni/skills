@@ -1,0 +1,10 @@
+{
+    "name": "avonni",
+    "version": "1.0.0",
+    "description": "Avonni skills and MCP server to create and update Avonni components.",
+    "author": { "name": "Avonni" },
+    "homepage": "https://github.com/avonni/skills#readme",
+    "repository": "https://github.com/avonni/skills",
+    "license": "MIT",
+    "keywords": ["avonni", "salesforce", "lwc", "flow", "experience-cloud"]
+}
