@@ -2,9 +2,9 @@
 
 All notable changes to the Avonni skills are documented in this file. Versions follow the rules in [`CONTRIBUTING.md`](CONTRIBUTING.md#versioning).
 
-## 1.0.0 - 2026-10-05
+## 1.0.0 - 2026-10-21
 
-Baseline for the versioning rules. Earlier changes weren't versioned consistently, so they aren't listed.
+First release as a Claude Code and Codex plugin, and the baseline for the versioning rules. Earlier changes weren't versioned consistently, so they aren't listed.
 
 Skill versions:
 
