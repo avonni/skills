@@ -58,6 +58,17 @@ If no skill version changes and nothing in `.claude-plugin/`, `.codex-plugin/` o
 
 If another pull request bumps the version before yours merges, rebase on `main` and bump again from the new version.
 
+### Version check
+
+Every pull request runs `scripts/check-version-bumps.mjs`, which compares the branch to its base branch and fails when:
+
+-   A skill's files changed, but its version didn't move to the next patch, minor or major version.
+-   A new skill doesn't start at `1.0.0`.
+-   The plugin version wasn't bumped, or was bumped less than the changes require.
+-   The plugin version changed, but `CHANGELOG.md` doesn't start with an entry for it.
+
+Run it locally with `npm run check-versions` (compares to `origin/main`).
+
 ### Changelog
 
 Every plugin bump adds an entry at the top of [`CHANGELOG.md`](CHANGELOG.md). Use the merge date, list each skill that changed with its new version, and group its changes under `Added`, `Changed`, `Fixed` or `Removed`:
@@ -82,4 +93,4 @@ Every plugin bump adds an entry at the top of [`CHANGELOG.md`](CHANGELOG.md). Us
 
 -   Title format: `[type] (ENG-1234): Message`, with types such as `feat`, `fix`, `refactor`, `docs`, `test` and `version`. Pull requests are squash-merged with the same title.
 -   Fill in the checklist from the pull request template. A version bump can be its own commit, for example `[version] (ENG-1234): Bump skill version number to next patch`.
--   Run `npm test` before opening the pull request.
+-   Run `npm test` and `npm run check-versions` before opening the pull request.

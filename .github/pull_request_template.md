@@ -4,7 +4,7 @@
 
 ## Versioning
 
-<!-- See CONTRIBUTING.md#versioning. Check each box that applies, or only the last one. -->
+<!-- See CONTRIBUTING.md#versioning. Check each box that applies, or only the last one. CI checks the versions too; run `npm run check-versions` locally. -->
 
 -   [ ] Bumped `metadata.version` in the `SKILL.md` of each skill whose files changed
 -   [ ] Bumped `version` in `package.json`
