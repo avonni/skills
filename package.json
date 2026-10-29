@@ -4,7 +4,8 @@
     "description": "Avonni AI Agent Skills.",
     "main": "index.js",
     "scripts": {
-        "test": "node --test tests/**/*.test.mjs"
+        "test": "node --test tests/**/*.test.mjs",
+        "check-versions": "node scripts/check-version-bumps.mjs"
     },
     "repository": {
         "type": "git",
