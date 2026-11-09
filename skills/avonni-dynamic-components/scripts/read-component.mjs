@@ -30,11 +30,20 @@ function addNamespace(localName) {
  * @returns {string}
  */
 function unescapeXml(str) {
-    return str
-        .replace(/&quot;/g, '"')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&');
+    const namedEntities = { amp: '&', apos: "'", gt: '>', lt: '<', quot: '"' };
+    // A single pass, so that an escaped "&amp;#x27;" stays the literal text "&#x27;".
+    return str.replace(
+        /&(amp|apos|gt|lt|quot|#\d+|#x[0-9a-fA-F]+);/g,
+        (entity, name) => {
+            if (name.startsWith('#x')) {
+                return String.fromCodePoint(parseInt(name.slice(2), 16));
+            }
+            if (name.startsWith('#')) {
+                return String.fromCodePoint(parseInt(name.slice(1), 10));
+            }
+            return namedEntities[name];
+        }
+    );
 }
 
 /**
