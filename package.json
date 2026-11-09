@@ -1,6 +1,6 @@
 {
     "name": "avonni-skills",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Avonni AI Agent Skills.",
     "main": "index.js",
     "scripts": {

@@ -2,6 +2,15 @@
 
 All notable changes to the Avonni skills are documented in this file. Versions follow the rules in [`CONTRIBUTING.md`](CONTRIBUTING.md#versioning).
 
+## 1.1.0 - 2026-11-09
+
+### avonni-dynamic-components 1.1.0
+
+#### Added
+
+-   Filter and order queries by distance, from the user location or a picked record (ENG-6802).
+-   Filter on date literals and date functions (ENG-6802).
+
 ## 1.0.0 - 2026-10-21
 
 First release as a Claude Code and Codex plugin, and the baseline for the versioning rules. Earlier changes weren't versioned consistently, so they aren't listed.

@@ -1,6 +1,6 @@
 {
     "name": "avonni",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Avonni skills and MCP server to create and update Avonni components.",
     "author": { "name": "Avonni" },
     "homepage": "https://github.com/avonni/skills#readme",

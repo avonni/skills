@@ -163,6 +163,102 @@ Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Nu
 }
 ```
 
+#### Date Literals and Date Functions
+
+A SOQL date literal (`TODAY`, `THIS_MONTH`, `LAST_N_DAYS:30`, `NEXT_N_WEEKS:2`…) is a variable value. Type the variable like the field, `Date` or `DateTime`:
+
+```json
+{
+    "filter": "CloseDate = :variable1 AND CreatedDate = :variable2",
+    "filterVariables": {
+        "variable1": "THIS_QUARTER",
+        "variable2": "LAST_N_DAYS:30"
+    },
+    "filterVariablesTypes": {
+        "variable1": "Date",
+        "variable2": "DateTime"
+    }
+}
+```
+
+A SOQL date function compares a part of a Date or DateTime field: `CALENDAR_MONTH`, `CALENDAR_QUARTER`, `CALENDAR_YEAR`, `DAY_IN_MONTH`, `DAY_IN_WEEK`, `DAY_IN_YEAR`, `DAY_ONLY`, `FISCAL_MONTH`, `FISCAL_QUARTER`, `FISCAL_YEAR`, `HOUR_IN_DAY`, `WEEK_IN_MONTH` and `WEEK_IN_YEAR`. Its variable is a `Number`, except for `DAY_ONLY`, which is a `Date`:
+
+```json
+{
+    "filter": "CALENDAR_YEAR(CloseDate) = :variable1 AND DAY_ONLY(CreatedDate) = :variable2",
+    "filterVariables": {
+        "variable1": "2025",
+        "variable2": "2025-12-13"
+    },
+    "filterVariablesTypes": {
+        "variable1": "Number",
+        "variable2": "Date"
+    }
+}
+```
+
+#### Filter by Distance
+
+To keep the records within a distance of a point, compare the `DISTANCE()` of a location field to a radius:
+
+```
+DISTANCE(BillingAddress, GEOLOCATION(:variable1, :variable2), 'km') < :variable3
+```
+
+-   The location field is a compound Address field (`BillingAddress`, `ShippingAddress`, `MailingAddress`…) or a Geolocation custom field (`Location__c`). Never use its separate latitude and longitude fields.
+-   Only `<` (within the radius) and `>` (beyond the radius) are allowed. Never wrap `DISTANCE()` in `NOT()`.
+-   The unit is `'km'` or `'mi'`, written in the filter, never as a variable.
+-   The latitude, longitude and radius are variables of type `Double`.
+-   When the latitude, longitude or radius is empty at runtime, the condition matches no record.
+-   An Address field only has coordinates once Salesforce geocodes it, which needs the matching Data Integration Rule (for example "Geocodes for Account Billing Address"). Records without coordinates never match.
+
+Common centers:
+
+| Center                            | Latitude                                        | Longitude                                        |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------------------ |
+| Current user position             | `{!$Location.CurrentPosition.Latitude}`         | `{!$Location.CurrentPosition.Longitude}`         |
+| Account picked in a Record Picker | `{!CenterAccount.valueSObject.BillingLatitude}` | `{!CenterAccount.valueSObject.BillingLongitude}` |
+
+`$Location` is described in [Global References](build-component.md#location). It asks the user to share their location when the component loads.
+
+#### Order by Distance
+
+`orderBy` can sort the records by their distance to a point:
+
+```
+DISTANCE(BillingAddress, GEOLOCATION(45.5017, -73.5673), 'km') ASC NULLS LAST
+```
+
+-   `orderBy` has no variables. Write the latitude and longitude inline, as numbers or as references (`{!$Location.CurrentPosition.Latitude}`). Never use `:placeholders` in `orderBy`.
+-   A distance order must be the only order. The record ID is added after it automatically.
+-   Use `ASC NULLS LAST` to list the nearest records first and the records without location last. Without `NULLS LAST`, the records without location come first.
+-   When the latitude or longitude is empty at runtime, the order is dropped and the records come back ordered by ID.
+
+#### Example — Nearest Accounts Around a Picked Account
+
+A Record Picker named `CenterAccount` picks an Account. The query lists the other Accounts within 10 km of it, nearest first:
+
+```json
+{
+    "apiName": "nearby_accounts",
+    "objectApiName": "Account",
+    "filter": "DISTANCE(BillingAddress, GEOLOCATION(:variable1, :variable2), 'km') < :variable3 AND Id != :variable4",
+    "filterVariables": {
+        "variable1": "{!CenterAccount.valueSObject.BillingLatitude}",
+        "variable2": "{!CenterAccount.valueSObject.BillingLongitude}",
+        "variable3": "10",
+        "variable4": "{!CenterAccount.value}"
+    },
+    "filterVariablesTypes": {
+        "variable1": "Double",
+        "variable2": "Double",
+        "variable3": "Double",
+        "variable4": "Id"
+    },
+    "orderBy": "DISTANCE(BillingAddress, GEOLOCATION({!CenterAccount.valueSObject.BillingLatitude}, {!CenterAccount.valueSObject.BillingLongitude}), 'km') ASC NULLS LAST"
+}
+```
+
 ### Query Binding
 
 Use when items come from a query result.
