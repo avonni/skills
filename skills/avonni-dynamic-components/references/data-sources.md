@@ -163,76 +163,21 @@ Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Nu
 }
 ```
 
-#### Date Literals and Date Functions
+#### Variable Types for Dates and Distances
 
-A SOQL date literal (`TODAY`, `THIS_MONTH`, `LAST_N_DAYS:30`, `NEXT_N_WEEKS:2`…) is a variable value. Type the variable like the field, `Date` or `DateTime`:
+Pick these `filterVariablesTypes`, or the query fails at runtime:
 
-```json
-{
-    "filter": "CloseDate = :variable1 AND CreatedDate = :variable2",
-    "filterVariables": {
-        "variable1": "THIS_QUARTER",
-        "variable2": "LAST_N_DAYS:30"
-    },
-    "filterVariablesTypes": {
-        "variable1": "Date",
-        "variable2": "DateTime"
-    }
-}
-```
-
-A SOQL date function compares a part of a Date or DateTime field: `CALENDAR_MONTH`, `CALENDAR_QUARTER`, `CALENDAR_YEAR`, `DAY_IN_MONTH`, `DAY_IN_WEEK`, `DAY_IN_YEAR`, `DAY_ONLY`, `FISCAL_MONTH`, `FISCAL_QUARTER`, `FISCAL_YEAR`, `HOUR_IN_DAY`, `WEEK_IN_MONTH` and `WEEK_IN_YEAR`. Its variable is a `Number`, except for `DAY_ONLY`, which is a `Date`:
-
-```json
-{
-    "filter": "CALENDAR_YEAR(CloseDate) = :variable1 AND DAY_ONLY(CreatedDate) = :variable2",
-    "filterVariables": {
-        "variable1": "2025",
-        "variable2": "2025-12-13"
-    },
-    "filterVariablesTypes": {
-        "variable1": "Number",
-        "variable2": "Date"
-    }
-}
-```
-
-#### Filter by Distance
-
-To keep the records within a distance of a point, compare the `DISTANCE()` of a location field to a radius:
-
-```
-DISTANCE(BillingAddress, GEOLOCATION(:variable1, :variable2), 'km') < :variable3
-```
-
--   The location field is a compound Address field (`BillingAddress`, `ShippingAddress`, `MailingAddress`…) or a Geolocation custom field (`Location__c`). Never use its separate latitude and longitude fields.
--   Only `<` (within the radius) and `>` (beyond the radius) are allowed. Never wrap `DISTANCE()` in `NOT()`.
--   The unit is `'km'` or `'mi'`, written in the filter, never as a variable.
--   The latitude, longitude and radius are variables of type `Double`.
--   When the latitude, longitude or radius is empty at runtime, the condition matches no record.
--   An Address field only has coordinates once Salesforce geocodes it, which needs the matching Data Integration Rule (for example "Geocodes for Account Billing Address"). Records without coordinates never match.
-
-Common centers:
-
-| Center                            | Latitude                                        | Longitude                                        |
-| --------------------------------- | ----------------------------------------------- | ------------------------------------------------ |
-| Current user position             | `{!$Location.CurrentPosition.Latitude}`         | `{!$Location.CurrentPosition.Longitude}`         |
-| Account picked in a Record Picker | `{!CenterAccount.valueSObject.BillingLatitude}` | `{!CenterAccount.valueSObject.BillingLongitude}` |
-
-`$Location` is described in [Global References](build-component.md#location). It asks the user to share their location when the component loads.
+-   A date literal (`THIS_QUARTER`, `LAST_N_DAYS:30`…) is a variable value, typed like its field: `Date` or `DateTime`.
+-   A date function (`CALENDAR_YEAR()`, `HOUR_IN_DAY()`…) compares to a `Number` variable, except `DAY_ONLY()`, which compares to a `Date`.
+-   The latitude, longitude and radius of `DISTANCE()` are `Double`. When one of them is empty at runtime, the condition matches no record.
 
 #### Order by Distance
 
-`orderBy` can sort the records by their distance to a point:
+-   Write the center inline in `orderBy`, as numbers or references. Never use `:placeholders` in `orderBy`.
+-   A distance order must be the only order.
+-   When the center is empty at runtime, the order is dropped and the records come back ordered by ID.
 
-```
-DISTANCE(BillingAddress, GEOLOCATION(45.5017, -73.5673), 'km') ASC NULLS LAST
-```
-
--   `orderBy` has no variables. Write the latitude and longitude inline, as numbers or as references (`{!$Location.CurrentPosition.Latitude}`). Never use `:placeholders` in `orderBy`.
--   A distance order must be the only order. The record ID is added after it automatically.
--   Use `ASC NULLS LAST` to list the nearest records first and the records without location last. Without `NULLS LAST`, the records without location come first.
--   When the latitude or longitude is empty at runtime, the order is dropped and the records come back ordered by ID.
+Usual centers: the user position, `{!$Location.CurrentPosition.Latitude}` and `{!$Location.CurrentPosition.Longitude}` (see [Global References](build-component.md#location)), or a record picked in a Record Picker, `{!<apiName>.valueSObject.BillingLatitude}` and `{!<apiName>.valueSObject.BillingLongitude}`.
 
 #### Example — Nearest Accounts Around a Picked Account
 

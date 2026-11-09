@@ -8,8 +8,7 @@ All notable changes to the Avonni skills are documented in this file. Versions f
 
 #### Added
 
--   Filter and order queries by distance, from the user location or a picked record (ENG-6802).
--   Filter on date literals and date functions (ENG-6802).
+-   Variable types for date literals, date functions and distances, and orders by distance (ENG-6802).
 
 ## 1.0.0 - 2026-10-21
 
