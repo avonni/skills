@@ -14,6 +14,18 @@ All notable changes to the Avonni skills are documented in this file. Versions f
 
 -   Reading a component decodes `&apos;` and numeric entities such as `&#x27;`, which Salesforce writes for apostrophes. They were kept as text and saved back double-escaped (ENG-6802).
 
+### avonni-experience-components 1.1.0
+
+#### Added
+
+-   Distance filters and orders by distance in queries (ENG-6802).
+
+### avonni-flow-components 1.1.0
+
+#### Added
+
+-   Distance filters and orders by distance in queries (ENG-6802).
+
 ## 1.0.0 - 2026-10-21
 
 First release as a Claude Code and Codex plugin, and the baseline for the versioning rules. Earlier changes weren't versioned consistently, so they aren't listed.

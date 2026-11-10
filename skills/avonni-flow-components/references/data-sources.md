@@ -128,6 +128,34 @@ These optional parameters refine the query. They apply to the component's query 
 
 Only include the options the request needs. Field API names used in filters and order-by must exist on the queried object — never invent them; retrieve them by reading `get-object-documentation.md`.
 
+### Distance Queries
+
+To keep the records within a radius of a point, write a `DISTANCE()` comparison in `queryFiltersExpression`. `<` keeps the records within the radius, `>` the records outside it:
+
+```xml
+<inputParameters>
+    <name>queryFiltersExpression</name>
+    <value>
+        <stringValue>DISTANCE(BillingAddress, GEOLOCATION(45.5, -73.56), &apos;km&apos;) &lt; 10</stringValue>
+    </value>
+</inputParameters>
+```
+
+To list the records nearest first, add a distance order to `queryOrderBySerialized`. It must be the only order:
+
+```xml
+<inputParameters>
+    <name>queryOrderBySerialized</name>
+    <value>
+        <stringValue>[{&quot;type&quot;:&quot;distance&quot;,&quot;field&quot;:&quot;BillingAddress&quot;,&quot;latitude&quot;:45.5,&quot;longitude&quot;:-73.56,&quot;unit&quot;:&quot;km&quot;,&quot;direction&quot;:&quot;ASC NULLS LAST&quot;}]</stringValue>
+    </value>
+</inputParameters>
+```
+
+-   The location field is a Geolocation field or a compound address field, such as `BillingAddress`, of the queried object itself, not of a related object. An address has coordinates only once Salesforce geocodes it; records without coordinates never match.
+-   The unit is `km` or `mi`. The latitude, the longitude and the radius are numbers.
+-   When a text formula builds the filter, it must never leave a coordinate or the radius empty: the expression no longer parses, and the component shows an error instead of records.
+
 ---
 
 ## Picklist Data Source
