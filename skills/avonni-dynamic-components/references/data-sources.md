@@ -126,7 +126,8 @@ When a component uses a query as its data source, a query definition has to be c
 
 `filter` is the SOQL WHERE clause only (no `WHERE` keyword).
 
--   Every field value mentioned in `filter` must be transformed into a variable.
+-   Every field value mentioned in `filter` must be transformed into a variable, except the unit of `DISTANCE()` (`'km'` or `'mi'`) and the number compared to a `FORMULA()`, which stay inline.
+-   A `FORMULA()` filter quotes its expression and combines two fields with `+` or `-`: `FORMULA('Amount - ExpectedRevenue') > 1000`. It is a Salesforce pilot: use it only when the request asks for it.
 -   Variables use `:variableName` placeholders.
 -   If the filter contains any `:variableName` placeholder, you **must** include both `filterVariables` and `filterVariablesTypes`. Every placeholder must exist as a key in both objects — 1:1, exact match.
 -   Never add keys to `filterVariables` and `filterVariablesTypes` that are not referenced in `filter`.
