@@ -129,7 +129,7 @@ These optional parameters refine the query. They apply to the component's query 
 Only include the options the request needs. Field API names used in filters and order-by must exist on the queried object — never invent them; retrieve them by reading `get-object-documentation.md`.
 
 -   To list the records nearest first, use a distance order as the only order of `queryOrderBySerialized`: `{"type":"distance","field":"BillingAddress","latitude":45.5,"longitude":-73.56,"unit":"km","direction":"ASC NULLS LAST"}`.
--   A `FORMULA()` filter quotes its expression and combines two fields with `+` or `-`: `FORMULA('Amount - ExpectedRevenue') > 1000`. It is a Salesforce pilot: use it only when the request asks for it.
+-   A `FORMULA()` filter quotes its expression and combines two fields with `+` or `-`: `FORMULA('Amount - ExpectedRevenue') > 1000`.
 
 ---
 

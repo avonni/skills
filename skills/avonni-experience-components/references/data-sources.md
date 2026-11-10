@@ -86,7 +86,7 @@ Load Salesforce records and map them into component items.
     -   `nin` — not in (string fields only). Value is an array of strings.
     -   `like` — like the given matching pattern (string fields only).
 -   A distance filter keeps the records within a radius: `{ "field": "DISTANCE", "operator": "lt", "value": { "first": "BillingAddress", "second": { "latitude": "45.5", "longitude": "-73.56" }, "distance": "10", "unit": "km" } }`. The center and the radius are numbers, not references.
--   A formula filter compares two fields combined with `+` or `-` to a number: `{ "field": "FORMULA", "operator": "gt", "value": { "first": "Amount", "arithmeticOperator": "-", "second": "ExpectedRevenue", "value": "1000" } }`. `FORMULA()` is a Salesforce pilot: use it only when the request asks for it.
+-   A formula filter compares two fields combined with `+` or `-` to a number: `{ "field": "FORMULA", "operator": "gt", "value": { "first": "Amount", "arithmeticOperator": "-", "second": "ExpectedRevenue", "value": "1000" } }`.
 
 ### Orders
 

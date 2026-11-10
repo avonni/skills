@@ -81,7 +81,7 @@ Reuse existing component instances when possible.
 -   `filter` must be a valid SOQL WHERE clause **without** the `WHERE` keyword.
 -   `orderBy` must be valid SOQL ORDER BY syntax **without** the `ORDER BY` keyword.
 -   All referenced fields must exist on the queried object.
--   A `FORMULA()` filter quotes its expression and combines two fields with `+` or `-`: `FORMULA('Amount - ExpectedRevenue') > 1000`. It is a Salesforce pilot: use it only when the request asks for it.
+-   A `FORMULA()` filter quotes its expression and combines two fields with `+` or `-`: `FORMULA('Amount - ExpectedRevenue') > 1000`.
 -   Template expressions must use the exact syntax `{{Record.FieldApiName}}` (case-sensitive, usable at any nesting level).
 
 ## Slot Rules
