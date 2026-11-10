@@ -80,13 +80,13 @@ Every plugin bump adds an entry at the top of [`CHANGELOG.md`](CHANGELOG.md). Us
 
 #### Added
 
--   Support for chart components (ENG-1234).
+-   Support for chart components.
 
 ### avonni-flow-components 1.0.1
 
 #### Fixed
 
--   Keep screen field order when updating a flow (ENG-1235).
+-   Keep screen field order when updating a flow.
 ```
 
 ## Pull requests
