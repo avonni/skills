@@ -8,7 +8,7 @@ All notable changes to the Avonni skills are documented in this file. Versions f
 
 #### Added
 
--   Variable types for date literals, date functions and distances, and orders by distance.
+-   Variable types for date literals and date functions.
 -   The inline unit of `DISTANCE()` and the quoted expression of `FORMULA()` filters.
 
 #### Fixed

@@ -164,46 +164,12 @@ Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Nu
 }
 ```
 
-#### Variable Types for Dates and Distances
+#### Variable Types for Dates
 
 Pick these `filterVariablesTypes`, or the query fails at runtime:
 
 -   A date literal (`THIS_QUARTER`, `LAST_N_DAYS:30`…) is a variable value, typed like its field: `Date` or `DateTime`.
 -   A date function (`CALENDAR_YEAR()`, `HOUR_IN_DAY()`…) compares to a `Number` variable, except `DAY_ONLY()`, which compares to a `Date`.
--   The latitude, longitude and radius of `DISTANCE()` are `Double`. When one of them is empty at runtime, the condition matches no record.
-
-#### Order by Distance
-
--   Write the center inline in `orderBy`, as numbers or references. Never use `:placeholders` in `orderBy`.
--   A distance order must be the only order.
--   When the center is empty at runtime, the order is dropped and the records come back ordered by ID.
-
-Usual centers: the user position, `{!$Location.CurrentPosition.Latitude}` and `{!$Location.CurrentPosition.Longitude}` (see [Global References](build-component.md#location)), or a record picked in a Record Picker, `{!<apiName>.valueSObject.BillingLatitude}` and `{!<apiName>.valueSObject.BillingLongitude}`.
-
-#### Example — Nearest Accounts Around a Picked Account
-
-A Record Picker named `CenterAccount` picks an Account. The query lists the other Accounts within 10 km of it, nearest first:
-
-```json
-{
-    "apiName": "nearby_accounts",
-    "objectApiName": "Account",
-    "filter": "DISTANCE(BillingAddress, GEOLOCATION(:variable1, :variable2), 'km') < :variable3 AND Id != :variable4",
-    "filterVariables": {
-        "variable1": "{!CenterAccount.valueSObject.BillingLatitude}",
-        "variable2": "{!CenterAccount.valueSObject.BillingLongitude}",
-        "variable3": "10",
-        "variable4": "{!CenterAccount.value}"
-    },
-    "filterVariablesTypes": {
-        "variable1": "Double",
-        "variable2": "Double",
-        "variable3": "Double",
-        "variable4": "Id"
-    },
-    "orderBy": "DISTANCE(BillingAddress, GEOLOCATION({!CenterAccount.valueSObject.BillingLatitude}, {!CenterAccount.valueSObject.BillingLongitude}), 'km') ASC NULLS LAST"
-}
-```
 
 ### Query Binding
 
