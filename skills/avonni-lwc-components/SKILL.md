@@ -7,7 +7,7 @@ description: >
 license: MIT
 compatibility: 'Requires the Avonni MCP server (avonni toolset)'
 metadata:
-    version: '1.0.0'
+    version: '1.1.0'
 ---
 
 # avonni-lwc-components
@@ -81,6 +81,10 @@ Reuse existing component instances when possible.
 -   `filter` must be a valid SOQL WHERE clause **without** the `WHERE` keyword.
 -   `orderBy` must be valid SOQL ORDER BY syntax **without** the `ORDER BY` keyword.
 -   All referenced fields must exist on the queried object.
+-   To keep the records within a radius of a point, write a `DISTANCE()` comparison in `filter`, for example `DISTANCE(BillingAddress, GEOLOCATION(45.5, -73.56), 'km') < 10`. `<` keeps the records within the radius, `>` the records outside it.
+-   To list the records nearest first, set `orderBy` to a single `DISTANCE()` order, for example `DISTANCE(BillingAddress, GEOLOCATION(45.5, -73.56), 'km') ASC NULLS LAST`. It must be the only order.
+-   In a distance filter or order, the location field is a Geolocation field or a compound address field, such as `BillingAddress`, of the queried object itself, not of a related object. An address has coordinates only once Salesforce geocodes it; records without coordinates never match. The unit is `km` or `mi`, and the latitude, the longitude and the radius are numbers.
+-   When the JS builds a distance filter or order from a changing center, such as the user's location, build it only once every coordinate and the radius are known. An empty or `undefined` value makes the query unparsable.
 -   Template expressions must use the exact syntax `{{Record.FieldApiName}}` (case-sensitive, usable at any nesting level).
 
 ## Slot Rules
