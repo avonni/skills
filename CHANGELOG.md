@@ -9,7 +9,7 @@ All notable changes to the Avonni skills are documented in this file. Versions f
 #### Added
 
 -   Variable types for date literals and date functions.
--   Examples of distance and formula filters, whose unit and number stay inline.
+-   `DISTANCE()` and `FORMULA()` conditions in the filter example.
 
 #### Fixed
 
