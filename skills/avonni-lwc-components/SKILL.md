@@ -7,7 +7,7 @@ description: >
 license: MIT
 compatibility: 'Requires the Avonni MCP server (avonni toolset)'
 metadata:
-    version: '1.1.0'
+    version: '1.0.0'
 ---
 
 # avonni-lwc-components
@@ -81,7 +81,6 @@ Reuse existing component instances when possible.
 -   `filter` must be a valid SOQL WHERE clause **without** the `WHERE` keyword.
 -   `orderBy` must be valid SOQL ORDER BY syntax **without** the `ORDER BY` keyword.
 -   All referenced fields must exist on the queried object.
--   A `FORMULA()` filter quotes its expression and combines two fields with `+` or `-`: `FORMULA('Amount - ExpectedRevenue') > 1000`.
 -   Template expressions must use the exact syntax `{{Record.FieldApiName}}` (case-sensitive, usable at any nesting level).
 
 ## Slot Rules

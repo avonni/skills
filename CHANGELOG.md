@@ -9,7 +9,7 @@ All notable changes to the Avonni skills are documented in this file. Versions f
 #### Added
 
 -   Variable types for date literals and date functions.
--   The inline unit of `DISTANCE()` and the quoted expression of `FORMULA()` filters.
+-   Examples of distance and formula filters, whose unit and number stay inline.
 
 #### Fixed
 
@@ -25,13 +25,7 @@ All notable changes to the Avonni skills are documented in this file. Versions f
 
 #### Added
 
--   Orders by distance and formula filters in queries.
-
-### avonni-lwc-components 1.1.0
-
-#### Added
-
--   Formula filters in queries.
+-   Orders by distance in queries.
 
 ## 1.0.0 - 2026-10-21
 

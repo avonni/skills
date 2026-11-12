@@ -126,8 +126,7 @@ When a component uses a query as its data source, a query definition has to be c
 
 `filter` is the SOQL WHERE clause only (no `WHERE` keyword).
 
--   Every field value mentioned in `filter` must be transformed into a variable, except the unit of `DISTANCE()` (`'km'` or `'mi'`) and the number compared to a `FORMULA()`, which stay inline.
--   A `FORMULA()` filter quotes its expression and combines two fields with `+` or `-`: `FORMULA('Amount - ExpectedRevenue') > 1000`.
+-   Every field value mentioned in `filter` must be transformed into a variable.
 -   Variables use `:variableName` placeholders.
 -   If the filter contains any `:variableName` placeholder, you **must** include both `filterVariables` and `filterVariablesTypes`. Every placeholder must exist as a key in both objects — 1:1, exact match.
 -   Never add keys to `filterVariables` and `filterVariablesTypes` that are not referenced in `filter`.
@@ -139,6 +138,9 @@ Maps each placeholder to its runtime value (static value or reference).
 #### filterVariablesTypes
 
 Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Number`, `Boolean`, `Date`, `DateTime`, `Double`, `Int`, `Time`, `Id`
+
+-   A date literal (`THIS_QUARTER`, `LAST_N_DAYS:30`…) is a variable value, typed like its field: `Date` or `DateTime`.
+-   A date function (`CALENDAR_YEAR()`, `HOUR_IN_DAY()`…) compares to a `Number` variable, except `DAY_ONLY()`, which compares to a `Date`.
 
 #### Example — Filter with Mixed Variable Types
 
@@ -164,12 +166,39 @@ Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Nu
 }
 ```
 
-#### Variable Types for Dates
+#### Example — Distance Filter
 
-Pick these `filterVariablesTypes`, or the query fails at runtime:
+The unit of `DISTANCE()` is not a field value: it stays inline.
 
--   A date literal (`THIS_QUARTER`, `LAST_N_DAYS:30`…) is a variable value, typed like its field: `Date` or `DateTime`.
--   A date function (`CALENDAR_YEAR()`, `HOUR_IN_DAY()`…) compares to a `Number` variable, except `DAY_ONLY()`, which compares to a `Date`.
+```json
+{
+    "apiName": "get_accounts_near_me",
+    "objectApiName": "Account",
+    "filter": "DISTANCE(BillingAddress, GEOLOCATION(:variable1lat, :variable1long), 'km') < :variable1distance",
+    "filterVariables": {
+        "variable1lat": "{!$Location.CurrentPosition.Latitude}",
+        "variable1long": "{!$Location.CurrentPosition.Longitude}",
+        "variable1distance": 10
+    },
+    "filterVariablesTypes": {
+        "variable1lat": "Double",
+        "variable1long": "Double",
+        "variable1distance": "Double"
+    }
+}
+```
+
+#### Example — Formula Filter
+
+The number compared to a `FORMULA()` is not a field value: it stays inline.
+
+```json
+{
+    "apiName": "get_opportunities_above_expected",
+    "objectApiName": "Opportunity",
+    "filter": "FORMULA('Amount - ExpectedRevenue') > 1000"
+}
+```
 
 ### Query Binding
 
