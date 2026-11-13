@@ -139,26 +139,35 @@ Maps each placeholder to its runtime value (static value or reference).
 
 Maps each placeholder to its Salesforce field type. Allowed types: `String`, `Number`, `Boolean`, `Date`, `DateTime`, `Double`, `Int`, `Time`, `Id`
 
+-   A date literal (`THIS_QUARTER`, `LAST_N_DAYS:30`…) is a variable value, typed like its field: `Date` or `DateTime`.
+-   A date function (`CALENDAR_YEAR()`, `HOUR_IN_DAY()`…) compares to a `Number` variable, except `DAY_ONLY()`, which compares to a `Date`.
+
 #### Example — Filter with Mixed Variable Types
 
 ```json
 {
     "apiName": "get_accounts",
     "objectApiName": "Account",
-    "filter": "Industry IN (:variable1item0, :variable1item1, :variable1item2) AND (Name LIKE :variable2 OR CreatedDate >= :variable3)",
+    "filter": "Industry IN (:variable1item0, :variable1item1, :variable1item2) AND (Name LIKE :variable2 OR CreatedDate >= :variable3) AND DISTANCE(BillingAddress, GEOLOCATION(:variable4lat, :variable4long), 'km') < :variable4distance AND FORMULA('AnnualRevenue - NumberOfEmployees') > 1000",
     "filterVariables": {
         "variable1item0": "Agriculture",
         "variable1item1": "Biotechnology",
         "variable1item2": "Chemicals",
         "variable2": "{!$GlobalConstant.EmptyString}",
-        "variable3": "2026-03-24T05:41:41Z"
+        "variable3": "2026-03-24T05:41:41Z",
+        "variable4lat": "{!$Location.CurrentPosition.Latitude}",
+        "variable4long": "{!$Location.CurrentPosition.Longitude}",
+        "variable4distance": 10
     },
     "filterVariablesTypes": {
         "variable1item0": "String",
         "variable1item1": "String",
         "variable1item2": "String",
         "variable2": "String",
-        "variable3": "DateTime"
+        "variable3": "DateTime",
+        "variable4lat": "Double",
+        "variable4long": "Double",
+        "variable4distance": "Double"
     }
 }
 ```

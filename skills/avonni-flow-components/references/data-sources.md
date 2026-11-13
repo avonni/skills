@@ -117,14 +117,14 @@ Query mode also requires a `systemContext` parameter on the field (see **System 
 
 These optional parameters refine the query. They apply to the component's query as a whole:
 
-| Parameter                      | Value                                                                                                                               |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `queryFiltersExpression`       | A SOQL `WHERE` clause string, without the `WHERE` keyword (literal, or `<elementReference>` to a text formula for reactive filters) |
-| `queryLimit`                   | Maximum number of records (`<numberValue>`)                                                                                         |
-| `queryOrderBySerialized`       | JSON array of `{"field":"FieldApiName","direction":"ASC"\|"DESC"}` objects                                                          |
-| `queryFieldsSerialized`        | JSON array of extra field API names to query, when referenced outside the mapping                                                   |
-| `queryStripInaccessibleFields` | `<booleanValue>` — strip fields the running user cannot access                                                                      |
-| `querySystemMode`              | `<booleanValue>` — run the query in system mode                                                                                     |
+| Parameter                      | Value                                                                                                                                                                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `queryFiltersExpression`       | A SOQL `WHERE` clause string, without the `WHERE` keyword (literal, or `<elementReference>` to a text formula for reactive filters)                                                                                                                                             |
+| `queryLimit`                   | Maximum number of records (`<numberValue>`)                                                                                                                                                                                                                                     |
+| `queryOrderBySerialized`       | JSON array of `{"field":"FieldApiName","direction":"ASC"\|"DESC"}` objects. To list the records nearest first, a distance order is the only order: `[{"type":"distance","field":"BillingAddress","latitude":45.5,"longitude":-73.56,"unit":"km","direction":"ASC NULLS LAST"}]` |
+| `queryFieldsSerialized`        | JSON array of extra field API names to query, when referenced outside the mapping                                                                                                                                                                                               |
+| `queryStripInaccessibleFields` | `<booleanValue>` — strip fields the running user cannot access                                                                                                                                                                                                                  |
+| `querySystemMode`              | `<booleanValue>` — run the query in system mode                                                                                                                                                                                                                                 |
 
 Only include the options the request needs. Field API names used in filters and order-by must exist on the queried object — never invent them; retrieve them by reading `get-object-documentation.md`.
 

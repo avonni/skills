@@ -85,13 +85,17 @@ Load Salesforce records and map them into component items.
     -   `in` — in (string fields only). Value is an array of strings.
     -   `nin` — not in (string fields only). Value is an array of strings.
     -   `like` — like the given matching pattern (string fields only).
+-   A distance filter keeps the records within a radius: `{ "field": "DISTANCE", "operator": "lt", "value": { "first": "BillingAddress", "second": { "latitude": "45.5", "longitude": "-73.56" }, "distance": "10", "unit": "km" } }`. The center and the radius are numbers, not references.
+-   A formula filter compares two fields combined with `+` or `-` to a number: `{ "field": "FORMULA", "operator": "gt", "value": { "first": "Amount", "arithmeticOperator": "-", "second": "ExpectedRevenue", "value": "1000" } }`.
 
 ### Orders
 
 Array of order directives in the form of an object with two keys:
 
 -   `field` — API name of the object field on which the sorting is performed.
--   `direction` — Direction of the sorting. Accepted values are `ASC`, `DESC`, `ASC NULLS LAST` and `DESC NULLS LAST`.
+-   `direction` — Direction of the sorting. Accepted values are `ASC`, `DESC`, `ASC NULLS FIRST`, `ASC NULLS LAST`, `DESC NULLS FIRST` and `DESC NULLS LAST`.
+
+To list the records nearest first, use a distance order as the only order: `{ "type": "distance", "field": "BillingAddress", "latitude": 45.5, "longitude": -73.56, "unit": "km", "direction": "ASC NULLS LAST" }`.
 
 ## Static Data Source
 

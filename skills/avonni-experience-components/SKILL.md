@@ -4,7 +4,7 @@ description: Add, update, or remove Avonni components inside an existing Salesfo
 license: MIT
 compatibility: Requires Node.js >=18, the Avonni MCP server (experience toolset), and Salesforce CLI.
 metadata:
-    version: '1.0.0'
+    version: '1.1.0'
 ---
 
 # avonni-experience-components

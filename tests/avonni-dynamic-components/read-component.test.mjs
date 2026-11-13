@@ -318,6 +318,29 @@ describe('Read Component XML', () => {
             assert.equal(json.description, 'A & B');
         });
 
+        test('&apos; and numeric entities are unescaped, an escaped entity is not', () => {
+            const dir = mkdtempSync(join(tmpdir(), 'read-component-test-'));
+            try {
+                const xmlPath = join(dir, 'test.md-meta.xml');
+                const xml = buildXml({
+                    ...MINIMAL_FIELDS,
+                    avxp__Description__c: 'PLACEHOLDER'
+                }).replace(
+                    'PLACEHOLDER',
+                    '&#x27;km&#x27; &#39;mi&#39; &apos;m&apos; &amp;#x27;'
+                );
+                writeFileSync(xmlPath, xml, 'utf8');
+                const result = spawnSync('node', [SCRIPT, xmlPath], {
+                    encoding: 'utf8'
+                });
+                assert.equal(result.status, 0, result.stderr);
+                const { description } = JSON.parse(result.stdout);
+                assert.equal(description, "'km' 'mi' 'm' &#x27;");
+            } finally {
+                rmSync(dir, { recursive: true, force: true });
+            }
+        });
+
         test('JSON with quoted strings in Value__c is correctly unescaped and parsed', () => {
             const value = [
                 {
