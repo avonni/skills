@@ -76,7 +76,7 @@ Every parameter name is the property `name` exactly as documented by the MCP. Ne
 | `number`                                     | `<numberValue>`                                                                                             |
 | `boolean`                                    | `<booleanValue>` (`true`/`false`)                                                                           |
 | `object`                                     | `<stringValue>` containing the JSON object, under the property's own name                                   |
-| `object[]`, `string[]`, `number[]`, `date[]` | `<stringValue>` containing the JSON array, under **`<propertyName>Serialized`**                             |
+| `object[]`, `string[]`, `number[]`, `date[]` | `<stringValue>` containing the JSON array, under the property's own name                                    |
 | `interaction[]`                              | `<stringValue>` containing the JSON array, under the property's own name (see `references/interactions.md`) |
 | `record`, `record[]`                         | never literal — always an `<elementReference>` to a flow record (collection) variable                       |
 
@@ -100,7 +100,7 @@ To bind any property to a flow resource instead of a literal, use `<elementRefer
 </inputParameters>
 ```
 
-If a documented property name already ends in `Serialized`, use it as is. Most collection properties are documented under their serialized name directly; the append-`Serialized` rule above is the fallback for the few documented under their base name.
+Never add a `Serialized` suffix yourself: collection properties that need one are documented under their serialized name. When a component documents both forms (e.g. `valueCollection` and `valueCollectionSerialized`), write a literal under the serialized name and bind a flow variable under the base name.
 
 ### Parameter Rules
 

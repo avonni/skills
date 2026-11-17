@@ -8,6 +8,7 @@ Before choosing a data source type, check which keys exist in the component's `d
 
 -   `dataSources.static` entries are the **exact** parameter names to use (e.g. `itemsSerialized`, `optionsSerialized`, or Data Table's `columns` and `records`).
 -   `dataSources.query` and `dataSources.variables` entries are named `<prefix>SObjectMapping` (e.g. `itemsSObjectMapping`). Strip `SObjectMapping` to get the prefix used by the sibling parameters below.
+-   Exception: when `dataSources` declares an `sObjectPrefix` (e.g. Chart's `"sObjectPrefix": "records"`), its `query` and `variables` lists are empty. Use `sObjectPrefix` as the prefix of the sibling parameters, and write no `<prefix>SObjectMapping` parameter: the component maps its records through its own documented properties instead.
 -   The mode parameter is always named exactly `itemsTypeSelected`, whatever the entry prefixes — there is no `<prefix>TypeSelected` variant. Only the sibling binding parameters take the prefix (e.g. `eventsSObject`, `resourcesSObjectMapping`).
 -   An entry may declare an `sObjectType` (e.g. `"sObjectType": "R"`): the generic type its records map to in the field's `dataTypeMappings`. Entries without it map to the default type `T`. See **Data Type Mappings** in `references/build-screen-field.md`.
 
@@ -67,12 +68,12 @@ Use when items come from a flow resource: the result of a Get Records element, a
 </inputParameters>
 ```
 
-| Parameter                | Required | Description                                                                                                                                                                                      |
-| ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `itemsTypeSelected`      | yes      | Must be `variables`                                                                                                                                                                              |
-| `<prefix>SObject`        | yes      | `<elementReference>` to the record collection (a Get Records element name, or another component's property of type `record[]` like `myDataTable.selectedRows`)                                   |
-| `<prefix>SObjectApiName` | yes      | The object API name related to the selected record collection                                                                                                                                    |
-| `<prefix>SObjectMapping` | yes      | JSON object mapping each component item key to its value. Each key accepts a static value (`"standard:account"`), a record field (`"{{Record.Name}}"`), or a mix (`"In {{Record.BillingCity}}"`) |
+| Parameter                | Required                                              | Description                                                                                                                                                                                      |
+| ------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `itemsTypeSelected`      | yes                                                   | Must be `variables`                                                                                                                                                                              |
+| `<prefix>SObject`        | yes                                                   | `<elementReference>` to the record collection (a Get Records element name, or another component's property of type `record[]` like `myDataTable.selectedRows`)                                   |
+| `<prefix>SObjectApiName` | yes                                                   | The object API name related to the selected record collection                                                                                                                                    |
+| `<prefix>SObjectMapping` | yes, unless `dataSources` declares an `sObjectPrefix` | JSON object mapping each component item key to its value. Each key accepts a static value (`"standard:account"`), a record field (`"{{Record.Name}}"`), or a mix (`"In {{Record.BillingCity}}"`) |
 
 The mapping keys are the fields documented in the entry's `properties`. Keep `{{Record.FieldApiName}}` tokens literal — every field API name used in a mapping must come from the objects documentation (read `get-object-documentation.md`). The field must carry its `dataTypeMappings` (see **Data Type Mappings** in `references/build-screen-field.md`).
 
@@ -105,11 +106,11 @@ Use when the component should load Salesforce records itself, directly from the 
 </inputParameters>
 ```
 
-| Parameter                | Required | Description                                          |
-| ------------------------ | -------- | ---------------------------------------------------- |
-| `itemsTypeSelected`      | yes      | Must be `query`                                      |
-| `<prefix>SObjectApiName` | yes      | The object API name to query                         |
-| `<prefix>SObjectMapping` | yes      | Same JSON mapping format as the variable data source |
+| Parameter                | Required                                              | Description                                          |
+| ------------------------ | ----------------------------------------------------- | ---------------------------------------------------- |
+| `itemsTypeSelected`      | yes                                                   | Must be `query`                                      |
+| `<prefix>SObjectApiName` | yes                                                   | The object API name to query                         |
+| `<prefix>SObjectMapping` | yes, unless `dataSources` declares an `sObjectPrefix` | Same JSON mapping format as the variable data source |
 
 Query mode also requires a `systemContext` parameter on the field (see **System Context** in `references/build-screen-field.md`).
 
