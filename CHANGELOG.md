@@ -2,6 +2,15 @@
 
 All notable changes to the Avonni skills are documented in this file. Versions follow the rules in [`CONTRIBUTING.md`](CONTRIBUTING.md#versioning).
 
+## 1.1.1 - 2026-11-17
+
+### avonni-flow-components 1.1.1
+
+#### Fixed
+
+-   Malformed Chart query and variable data sources, rejected by Salesforce on deploy.
+-   Malformed collection property names, with an extra `Serialized` suffix.
+
 ## 1.1.0 - 2026-11-09
 
 ### avonni-dynamic-components 1.1.0
